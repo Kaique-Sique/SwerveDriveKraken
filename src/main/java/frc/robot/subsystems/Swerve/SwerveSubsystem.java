@@ -126,10 +126,17 @@ public class SwerveSubsystem extends SubsystemBase {
   // Create a NetworkTable publisher to publish the pose to NetworkTables
   // You can use this values on advanced scope from wpi
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
-      .getStructTopic("MyPose", Pose2d.struct).publish();
+      .getStructTopic("Swerve/MyPose", Pose2d.struct).publish();
 
   StructArrayPublisher<SwerveModuleState> swPublisher = NetworkTableInstance.getDefault()
-      .getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
+      .getStructArrayTopic("Swerve/MyStatesMeasured", SwerveModuleState.struct).publish();
+
+  StructArrayPublisher<SwerveModuleState> swDesiredPublisher = NetworkTableInstance.getDefault()
+      .getStructArrayTopic("Swerve/MyDesiredStates", SwerveModuleState.struct).publish();
+
+  StructPublisher<ChassisSpeeds> chassisPublisher = NetworkTableInstance.getDefault()
+      .getStructTopic("Swerve/ChassisSpeeds", ChassisSpeeds.struct)
+      .publish();
 
   // Autopilot for path following we must setup all of our motion constraints
   private static final APConstraints kConstraints = new APConstraints()
@@ -286,9 +293,6 @@ public class SwerveSubsystem extends SubsystemBase {
       System.out.println("Deploy1");
     }
 
-    // Publish the pose to NetworkTables 
-    publisher.set(getPoseEstimator());
-
     for (int i = 0; i < modules.length; i++) {
       SmartDashboard.putNumber("Module " + i + " /Drive Motor Current (Amp)", modules[i].getDriveCurrent());
       SmartDashboard.putNumber("Module " + i + " /Turn Motor Current (Amp)", modules[i].getTurnCurrent());
@@ -318,7 +322,11 @@ public class SwerveSubsystem extends SubsystemBase {
       // SmartDashboard.putNumber("Module " + i + " /Angle (rad)",
       // moduleStates[i].angle.getRadians());
     }
+    // Publish the pose to NetworkTables 
+    publisher.set(getPoseEstimator());
+    chassisPublisher.set(getChassisSpeeds());
     swPublisher.set(moduleStates);
+    swDesiredPublisher.set(getModuleDisiredStates());
   }
 
   /** Updates the field relative position of the robot. */
@@ -650,6 +658,14 @@ public class SwerveSubsystem extends SubsystemBase {
    * @return states
    */
   public SwerveModuleState[] getModuleStates() {
+    SwerveModuleState[] states = new SwerveModuleState[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      states[i] = modules[i].getState();
+    }
+    return states;
+  }
+
+  public SwerveModuleState[] getModuleDisiredStates() {
     SwerveModuleState[] states = new SwerveModuleState[modules.length];
     for (int i = 0; i < modules.length; i++) {
       states[i] = modules[i].getState();

@@ -101,6 +101,10 @@ public class SwerveModule extends SubsystemBase
         new Rotation2d(this.getTurningPositionRad() - m_chassisAngularOffset));
   }
 
+  public SwerveModuleState getDesiredState() {
+    return m_desiredState;
+  }
+
   /**
    * Returns the current state of the module. (velocity and angle) 
    *
