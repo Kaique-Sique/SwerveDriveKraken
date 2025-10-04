@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Limelight.LimelightHelpers;
 //import frc.robot.commands.sequencialPositions.rampIntakePosition;
-import frc.robot.commands.sequencialPositions.rampIntakePosition;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -78,11 +77,6 @@ public class Robot extends TimedRobot {
     PathfindingCommand.warmupCommand().schedule();
     // Reset all encoders
     RobotContainer.swerveDrive.zeroHeading();
-
-    RobotContainer.m_rampSubsystem.resetEncoder();
-    RobotContainer.aAlgae.resetEncoder();
-    RobotContainer.aCoral.resetEncoder();
-    RobotContainer.liftSubsystem.resetEncoder();
     /**
      * Zeroing / Seeding Limelight initial orientation -
      * To reset the internal IMU's fused robot yaw to the yaw submitted via
@@ -138,8 +132,6 @@ public class Robot extends TimedRobot {
     // disabled
     // LimelightHelpers.getLatestResults(DriveConstants.limelightFront);
     // LimelightHelpers.getLatestResults(DriveConstants.limelightBack);
-
-    RobotContainer.m_interface.disableInterface();
   }
 
   @Override
@@ -152,7 +144,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    new rampIntakePosition().schedule();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -182,10 +173,6 @@ public class Robot extends TimedRobot {
     }
     // RobotContainer.homingEndGame.schedule();
     // RobotContainer.initializeRamp.schedule();
-
-    new rampIntakePosition().schedule();
-
-    RobotContainer.m_interface.enableInterface();
   }
 
   /** This function is called periodically during operator control. */

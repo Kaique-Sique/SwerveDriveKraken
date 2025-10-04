@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-//Java Imports
-import com.pathplanner.lib.auto.AutoBuilder;
-
 //WPILIB Imports
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,26 +14,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 //Robot Imports
 import frc.robot.Constants.OIConstants.JoystickDriverConstants;
-import frc.robot.Constants.Pose2dConstansts.BluePose2d;
-import frc.robot.Constants.Pose2dConstansts.RedsPose2d;
 import frc.robot.Limelight.LimelightHelpers;
-import frc.robot.Utils.touchScreenInterface;
-import frc.robot.commands.AutoTrajectory1;
-import frc.robot.commands.RampCmd;
-import frc.robot.commands.autos.redTest;
-import frc.robot.commands.liftCommands.liftHome;
-import frc.robot.commands.liftCommands.liftLevelDashboard;
-import frc.robot.commands.sequencialPositions.normalPosition;
-import frc.robot.commands.sequencialPositions.rampIntakePosition;
-import frc.robot.commands.swerve.AimAndRangeCmd;
-import frc.robot.commands.swerve.AlignToReefTagRelative;
 import frc.robot.subsystems.LedControl;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
-import frc.robot.subsystems.algae.algaeArticulador;
-import frc.robot.subsystems.coral.ArticuladorCoral;
-import frc.robot.subsystems.coral.Coral;
-import frc.robot.subsystems.coral.RampSubsystem;
-import frc.robot.subsystems.liftSubsystem.LiftSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -63,73 +43,12 @@ public class RobotContainer {
   // Swerve Drive
   public static SwerveSubsystem swerveDrive = new SwerveSubsystem();
 
-  //articulador Coral
-  public static ArticuladorCoral aCoral = new ArticuladorCoral();
-
-  /**
-   * COMMANDS
-   */
-  /**
-   * SEQUENTIAL COMMANDS
-   */
-  public static AutoTrajectory1 autoTrajectory1 = new AutoTrajectory1();
-  // public static ScoreAutoCmd scoreAutoCmd = new ScoreAutoCmd();
-  // Swerve commands
-  public static AimAndRangeCmd aimAndRangeCmd = new AimAndRangeCmd();
-  public static AlignToReefTagRelative alignToReefTagRelative = new AlignToReefTagRelative(true, swerveDrive);
-
-  //Lift Subsystem
-  public static final LiftSubsystem liftSubsystem = new LiftSubsystem();
-
-  public static final Coral m_coral = new Coral();
-
-  public static final algaeArticulador aAlgae = new algaeArticulador();
-
-  //public static final AlgleIntake algaeCmd = new AlgleIntake(0);
-
-  public static RampSubsystem m_rampSubsystem = new RampSubsystem();
-
-  public static final RampCmd m_rampCmd = new RampCmd(0);
-
-  public static final rampIntakePosition coralPosition = new rampIntakePosition();
-  public static final normalPosition normal_positon = new normalPosition();
-
-
-  public static final touchScreenInterface m_interface = new touchScreenInterface();
-
-  // public static PathCoralStationCmd pathCoralStationAuto = new
-  // PathCoralStationCmd(1.5);
-
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  // public static XboxController driverJoystick;
-  // Controllers
-
-
-  /**
-   * Declare class SendableChoser()
-   * Pop up selection of option on the SmartDashBoard
-   */
   SendableChooser<Command> chooserAuto;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // Swerve Commands
-    aimAndRangeCmd.addRequirements(swerveDrive);
-    alignToReefTagRelative.addRequirements(swerveDrive);
-
-    m_rampCmd.addRequirements(m_rampSubsystem);
-    
-    //algaeCmd.addRequirements(aAlgae);
-
-    autoTrajectory1.addRequirements(swerveDrive);
-
-    // Build an auto chooser. This will use Commands.none() as the default option.
-    chooserAuto = AutoBuilder.buildAutoChooser();
-    coralPosition.addRequirements(m_rampSubsystem, aCoral, aAlgae);
-    normal_positon.addRequirements(m_rampSubsystem, aCoral, aAlgae);
-
     SmartDashboard.putData("Autonomous", chooserAuto);
 
     // Configure the button bindings
@@ -138,13 +57,9 @@ public class RobotContainer {
     // *******set default command to drive with joystick************/
     // The left stick controls translation of the robot.
     // Turning is controlled by the X axis of the right stick.
-
     /**
      * DEFAULT COMMANDS
      */
-    // liftSubsystem.setDefaultCommand(liftCmd);
-
-    // Runnable command
     swerveDrive.setDefaultCommand(new RunCommand(() -> swerveDrive.driveRobotOriented(() -> driverJoystick.getLeftY(),
         () -> driverJoystick.getLeftX(),
         () -> -driverJoystick.getRightX(),
@@ -168,18 +83,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    /**
-     * XBOX CONTROLLER BUTTONS
-     */
-
-    //new Trigger(() -> liftSubsystem.isL1()).onTrue(new RunCommand(() -> 
-      //                aCoral.holdMotorsOnPosition(57), aCoral));
-
-    //new Trigger(() -> driverJoystick.y().getAsBoolean()).onTrue(new RunCommand(() -> 
-    //                  aCoral.holdMotorsOnPosition(0), aCoral));
-
-    // Swerve Drive Buttons
-    // Changes robot speed - speeding up
+    // Changes robot speed - slow, fast, max
     driverJoystick.leftBumper().whileTrue(
         new InstantCommand(() -> {
           swerveDrive.robotSlower();
@@ -190,82 +94,24 @@ public class RobotContainer {
           swerveDrive.robotFast();
           ledControl.setYellowLed();
         }));
-
-    driverJoystick.start().onTrue(new InstantCommand(swerveDrive::zeroHeading));
-
-    driverJoystick.leftBumper().and(driverJoystick.rightBumper())
+        driverJoystick.leftBumper().and(driverJoystick.rightBumper())
         .whileFalse(new InstantCommand(() -> {
           swerveDrive.robotMaxSpeed();
           ledControl.setRedLed();
         }));
 
-    //lift commands
-    //lift to home position
-    driverJoystick.y().onTrue(
-      new RunCommand(() -> aCoral.holdMotorsOnPosition(0), aCoral).withTimeout(0.5)
-        .andThen(new liftHome())
-        .andThen(new RunCommand(() -> aCoral.holdMotorsOnPosition(0), aCoral).withTimeout(1)));
+    //zero heading - swerve modules to 0 degrees
+    driverJoystick.start().onTrue(new InstantCommand(swerveDrive::zeroHeading));
 
-    //lift to dashboard position
-    driverJoystick.a().onTrue(new liftLevelDashboard().andThen(new RunCommand(() -> 
-        aCoral.holdMotorsOnPosition(57), aCoral).withTimeout(2))
-       .alongWith(new InstantCommand (()-> swerveDrive.robotLiftVelocity(), swerveDrive)));
-
-    //driverJoystick.b().onTrue(new RunCommand(() -> aCoral.holdMotorsOnPosition(57), aCoral).withTimeout(0.8));
-
-
-    //position commands
-    //driverJoystick.x().onTrue(new RunCommand(() -> aCoral.holdMotorsOnPosition(0), aCoral).withTimeout(1));
+    // here you can implement generic positons to go to with buttons
     if (swerveDrive.getBlueAlliance())
     {
-        driverJoystick.x().whileTrue(
-                swerveDrive.driveToThePoint(()-> BluePose2d.coralA));
-
-        driverJoystick.b().whileTrue(
-              swerveDrive.driveToThePoint(()-> BluePose2d.driverStation)
-              .alongWith(new RunCommand(() -> aCoral.holdMotorsOnPosition(57), aCoral).withTimeout(1)));
+      //here to blue aliance positions
     }
     else
     {
-        driverJoystick.x().whileTrue(
-                swerveDrive.driveToThePoint(()-> RedsPose2d.coralA));
-
-
-        driverJoystick.b().whileTrue(
-              swerveDrive.driveToThePoint(()-> RedsPose2d.driverStation)
-              .alongWith(new RunCommand(() -> aCoral.holdMotorsOnPosition(57), aCoral).withTimeout(1)));
+      //here to red aliance positions
     }
-
-
-    //triggers comands
-    new Trigger(()-> liftSubsystem.isHomed() && !aCoral.getCoralInput()).onTrue(
-        new RunCommand(()-> aCoral.holdMotorsOnPosition(0), aCoral).withTimeout(0.8));
-
-    new Trigger(()-> liftSubsystem.isL1() && aCoral.getCoralInput() && m_coral.coralShooter()).onTrue(
-      new RunCommand(() -> aCoral.holdMotorsOnPosition(0), aCoral).withTimeout(0.5)
-        .andThen(new liftHome()));
-
-    new Trigger(() -> liftSubsystem.isHomed()).onTrue(new InstantCommand(()-> m_coral.resetEncoder()));
-
-
-    //// operator controls
-    operatorJoystick.b().onTrue(new InstantCommand(()-> m_coral.resetEncoder(), m_coral)
-      .andThen(new RunCommand(()-> m_coral.setPosition(5), m_coral).withTimeout(1)
-      .andThen(new InstantCommand(()-> m_coral.stopMotors(), m_coral))));
-
-    operatorJoystick.x().onTrue(new InstantCommand(()-> m_coral.resetEncoder(), m_coral)
-        .andThen(new RunCommand(()-> m_coral.setPosition(-5), m_coral).withTimeout(1)
-        .andThen(new InstantCommand(()-> m_coral.stopMotors(), m_coral))));
-
-    operatorJoystick.leftBumper().onTrue(new rampIntakePosition());
-    operatorJoystick.rightBumper().onTrue(new normalPosition());
-
-    //operatorJoystick.povUp().onTrue(new AlgleIntake(0));
-    operatorJoystick.povDown().whileTrue(new RunCommand(() -> aAlgae.setVelocity(0.07), aCoral)
-    ).onFalse(
-      new InstantCommand(() -> aAlgae.stopMotors(), aAlgae)
-    );
-
   }
 
   /**
@@ -274,8 +120,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    //return chooserAuto.getSelected();
-    return new redTest();
+    // choose the auto command from dashboard
+    return chooserAuto.getSelected();
   }
 }
