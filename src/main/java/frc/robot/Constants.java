@@ -8,8 +8,6 @@ package frc.robot;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.config.PIDConstants;
-//REV Imports
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 //WPI Imports
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -121,7 +119,7 @@ public final class Constants {
     public static double kDriveClosedLoopRamp = 0.25;
 
     /* Neutral Modes */
-    public static final IdleMode kTurningMotorIdleMode = IdleMode.kCoast; // template was coast SparkMax
+    public static final NeutralModeValue kTurningMotorIdleMode = NeutralModeValue.Coast; // template was coast SparkMax
     public static final NeutralModeValue driveNeutralMode = NeutralModeValue.Brake; // TalonFx
   }
 

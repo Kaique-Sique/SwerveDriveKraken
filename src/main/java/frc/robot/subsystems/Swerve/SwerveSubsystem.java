@@ -39,6 +39,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -126,6 +127,9 @@ public class SwerveSubsystem extends SubsystemBase {
   // You can use this values on advanced scope from wpi
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("MyPose", Pose2d.struct).publish();
+
+  StructArrayPublisher<SwerveModuleState> swPublisher = NetworkTableInstance.getDefault()
+      .getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
 
   // Autopilot for path following we must setup all of our motion constraints
   private static final APConstraints kConstraints = new APConstraints()
@@ -314,6 +318,7 @@ public class SwerveSubsystem extends SubsystemBase {
       // SmartDashboard.putNumber("Module " + i + " /Angle (rad)",
       // moduleStates[i].angle.getRadians());
     }
+    swPublisher.set(moduleStates);
   }
 
   /** Updates the field relative position of the robot. */
