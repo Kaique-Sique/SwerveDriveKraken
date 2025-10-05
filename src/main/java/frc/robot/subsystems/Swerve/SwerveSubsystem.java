@@ -195,26 +195,12 @@ public class SwerveSubsystem extends SubsystemBase {
     if (alliance2.get() == DriverStation.Alliance.Red) {
       allianceHeading = 0;
       blueAlliance = false;
-      // LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightFront,
-      // 0.110, 0.259, 0.410, 0, 0, 0);
-      // LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightLeft,
-      // 0.130, -0.259, 0.6, 0, 0, 0);
-      // LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightBack,
-      // 0.130, 0.259, 0.870, 0, 25, 180);
-      // LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 2);
-
       System.out.println("limelight settings Red");
 
     } else {
       // blue
       allianceHeading = 180;
       blueAlliance = true;
-      // LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightFront,
-      // 0.110, 0.259, 0.410, 0, 0, 0);
-      // LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightBack,
-      // 0.130, 0.259, 0.870, 0, 25, 180);
-      // LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 2);
-
       System.out.println("limelight settings Blue");
     }
 
@@ -497,7 +483,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
-  
+  /**
+   * 
+   * @return blue alliance true/false
+   */  
   public boolean getBlueAlliance() {
     return blueAlliance;
   }
@@ -505,7 +494,6 @@ public class SwerveSubsystem extends SubsystemBase {
   /** Zeroes the heading of the robot. */
   public void zeroHeading() {
     gyro.reset();
-
   }
 
   /** Resets the drive encoders to currently read a position of 0. */
@@ -529,7 +517,6 @@ public class SwerveSubsystem extends SubsystemBase {
         .toSwerveModuleStates(chassisSpeeds);
 
     // SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates,Constants.DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
-
     this.setModuleStates(swerveModuleStates);
   }
 
@@ -787,7 +774,6 @@ public class SwerveSubsystem extends SubsystemBase {
     if (!status.isOK()) {
       System.out.println("Could not apply gyro configs, error code: " + status.toString());
     }
-
     gyro.setYaw(0, 0);
   }
 
