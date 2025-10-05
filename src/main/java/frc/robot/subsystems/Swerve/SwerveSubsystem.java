@@ -138,6 +138,10 @@ public class SwerveSubsystem extends SubsystemBase {
       .getStructTopic("Swerve/ChassisSpeeds", ChassisSpeeds.struct)
       .publish();
 
+  StructPublisher<Rotation2d> rotation2dPublisher = NetworkTableInstance.getDefault()
+      .getStructTopic("Swerve/MyRotation2d", Rotation2d.struct)
+      .publish();
+
   // Autopilot for path following we must setup all of our motion constraints
   private static final APConstraints kConstraints = new APConstraints()
       .withVelocity(3.0)
@@ -317,6 +321,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     // Output Module States to SmartDashboard
     SwerveModuleState[] moduleStates = getModuleStates();
+    SwerveModuleState[] desiredStates = getModuleDisiredStates();
     for (int i = 0; i < moduleStates.length; i++) {
       SmartDashboard.putNumber("Module " + i + " /Speed (m/s)", moduleStates[i].speedMetersPerSecond);
       // SmartDashboard.putNumber("Module " + i + " /Angle (rad)",
@@ -324,9 +329,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     // Publish the pose to NetworkTables
     publisher.set(getPoseEstimator());
-    chassisPublisher.set(getChassisSpeeds());
-    swPublisher.set(getModuleStates());
-    swDesiredPublisher.set(getModuleDisiredStates());
+    chassisPublisher.set(this.getChassisSpeeds());
+    swPublisher.set(moduleStates);
+    swDesiredPublisher.set(desiredStates);
+    rotation2dPublisher.set(this.getPoseEstimator().getRotation());
   }
 
   /** Updates the field relative position of the robot. */
@@ -491,7 +497,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
-  //
+  
   public boolean getBlueAlliance() {
     return blueAlliance;
   }
@@ -645,6 +651,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
+   *  Get swerve module status on real time
    * 
    * @return states
    */
@@ -656,6 +663,12 @@ public class SwerveSubsystem extends SubsystemBase {
     return states;
   }
 
+
+  /**
+   * Get Swerve module desired status 
+   * 
+   * @return desired status
+   */
   public SwerveModuleState[] getModuleDisiredStates() {
     SwerveModuleState[] states = new SwerveModuleState[modules.length];
     for (int i = 0; i < modules.length; i++) {
@@ -699,9 +712,11 @@ public class SwerveSubsystem extends SubsystemBase {
     double ySpeed = ySpdFunction.get();
     double turningSpeed = turningSpdFunction.get();
     boolean fieldOriented = fieldOrientedFunction.get();
-    double throttle = 0.3;
+    double throttle = 0.3; // initial speed
 
     // Selects speed
+    //If its necessary you can add another option of speed, 
+    //on the 2025 season we use it when we call the lift
     if (throttleSlow) {
       throttle = 0.30;
     } else if (throttleFast) {
@@ -802,7 +817,6 @@ public class SwerveSubsystem extends SubsystemBase {
    *                              field or to therobot.
    * 
    **/
-
   public void driveToTarget(Supplier<Double> xSpdFunction,
       Supplier<Double> ySpdFunction,
       Supplier<Double> turningSpdFunction,

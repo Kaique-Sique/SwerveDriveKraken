@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 //Robot Imports
 import frc.robot.Constants.OIConstants.JoystickDriverConstants;
 import frc.robot.Limelight.LimelightHelpers;
@@ -28,9 +27,7 @@ import frc.robot.subsystems.Swerve.SwerveSubsystem;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  // Operator Controller
-
+  // Driver Controller
   public static CommandXboxController driverJoystick = new CommandXboxController(
       JoystickDriverConstants.kDriverControllerPort);
 
@@ -43,6 +40,9 @@ public class RobotContainer {
   // Swerve Drive
   public static SwerveSubsystem swerveDrive = new SwerveSubsystem();
 
+  // Put all commands here
+
+  // Create an auto chooser to autonomus mode
   SendableChooser<Command> chooserAuto;
 
   /**
@@ -57,9 +57,6 @@ public class RobotContainer {
     // *******set default command to drive with joystick************/
     // The left stick controls translation of the robot.
     // Turning is controlled by the X axis of the right stick.
-    /**
-     * DEFAULT COMMANDS
-     */
     swerveDrive.setDefaultCommand(new RunCommand(() -> swerveDrive.driveRobotOriented(() -> driverJoystick.getLeftY(),
         () -> driverJoystick.getLeftX(),
         () -> -driverJoystick.getRightX(),
@@ -68,19 +65,9 @@ public class RobotContainer {
     );
   }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be
-   * created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-   * an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-   * {@link
-   * CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
+  /** 
+   * use this method to configure triggers and operations 
+   * on teleop mode
    */
   private void configureBindings() {
     // Changes robot speed - slow, fast, max
