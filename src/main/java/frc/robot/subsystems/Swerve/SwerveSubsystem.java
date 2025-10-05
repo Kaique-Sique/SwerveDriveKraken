@@ -125,9 +125,23 @@ public class SwerveSubsystem extends SubsystemBase {
 
   // Create a NetworkTable publisher to publish the pose to NetworkTables
   // You can use this values on advanced scope from wpi
+
+  /**** Robot Poses 2D ****/
+  //Robot Pose2d
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("Swerve/MyPose", Pose2d.struct).publish();
 
+  //limelight left pose 2d
+  StructPublisher<Pose2d> poseLeftCamPublisher = NetworkTableInstance.getDefault()
+      .getStructTopic("Swerve/LeftCamPose", Pose2d.struct).publish();
+  //limelight front pose 2d
+  StructPublisher<Pose2d> poseFrontCamPublisher = NetworkTableInstance.getDefault()
+      .getStructTopic("Swerve/FrontCamPose", Pose2d.struct).publish();
+   //limelight back pose 2d
+  StructPublisher<Pose2d> poseBackCamPublisher = NetworkTableInstance.getDefault()
+      .getStructTopic("Swerve/BackCamPose", Pose2d.struct).publish();
+
+  /**Swerve NT Data publisher - swerveModule states**/
   StructArrayPublisher<SwerveModuleState> swPublisher = NetworkTableInstance.getDefault()
       .getStructArrayTopic("Swerve/MyStatesMeasured", SwerveModuleState.struct).publish();
 
@@ -319,6 +333,9 @@ public class SwerveSubsystem extends SubsystemBase {
     swPublisher.set(moduleStates);
     swDesiredPublisher.set(desiredStates);
     rotation2dPublisher.set(this.getPoseEstimator().getRotation());
+    poseFrontCamPublisher.set(this.visionPose2d(DriveConstants.limelightFront));
+    poseLeftCamPublisher.set(this.visionPose2d(DriveConstants.limelightLeft));
+    poseBackCamPublisher.set(this.visionPose2d(DriveConstants.limelightBack));
   }
 
   /** Updates the field relative position of the robot. */
@@ -481,6 +498,18 @@ public class SwerveSubsystem extends SubsystemBase {
         }
       }
     }
+  }
+
+  public Pose2d visionPose2d(String limelightName)
+  {
+    double[] botPose = LimelightHelpers.getBotPose(limelightName);
+
+    Pose2d visionPose = new Pose2d(
+      botPose[0], // x in metters
+      botPose[1], // y metters
+      Rotation2d.fromDegrees(botPose[5])
+    );
+    return visionPose;
   }
 
   /**
@@ -698,7 +727,7 @@ public class SwerveSubsystem extends SubsystemBase {
     double xSpeed = xSpdFunction.get();
     double ySpeed = ySpdFunction.get();
     double turningSpeed = turningSpdFunction.get();
-    boolean fieldOriented = fieldOrientedFunction.get();
+    //boolean fieldOriented = fieldOrientedFunction.get();
     double throttle = 0.3; // initial speed
 
     // Selects speed
