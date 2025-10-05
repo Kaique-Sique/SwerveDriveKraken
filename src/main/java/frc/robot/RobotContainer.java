@@ -94,23 +94,20 @@ public class RobotContainer {
           swerveDrive.robotFast();
           ledControl.setYellowLed();
         }));
-        driverJoystick.leftBumper().and(driverJoystick.rightBumper())
+    driverJoystick.leftBumper().and(driverJoystick.rightBumper())
         .whileFalse(new InstantCommand(() -> {
           swerveDrive.robotMaxSpeed();
           ledControl.setRedLed();
         }));
 
-    //zero heading - swerve modules to 0 degrees
+    // zero heading - swerve modules to 0 degrees
     driverJoystick.start().onTrue(new InstantCommand(swerveDrive::zeroHeading));
 
     // here you can implement generic positons to go to with buttons
-    if (swerveDrive.getBlueAlliance())
-    {
-      //here to blue aliance positions
-    }
-    else
-    {
-      //here to red aliance positions
+    if (swerveDrive.getBlueAlliance()) {
+      // here to blue aliance positions
+    } else {
+      // here to red aliance positions
     }
   }
 

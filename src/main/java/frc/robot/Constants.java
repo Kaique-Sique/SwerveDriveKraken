@@ -282,6 +282,7 @@ public final class Constants {
 
       public static final double kDeadband = 0.1;
     }
+
     public static final double kDeadband = 0.08;
   }
 
@@ -299,12 +300,12 @@ public final class Constants {
   public static final class Pose2dConstansts {
     // Poses to alliance red
     public static final class RedsPose2d {
-      //implement the positions here
+      // implement the positions here
     }
 
     // Poses to alliance blue
     public static final class BluePose2d {
-      //implement the positions here
+      // implement the positions here
     }
   }
 }

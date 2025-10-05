@@ -28,12 +28,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Utils.Conversions;
 
-public class SwerveModule extends SubsystemBase 
-{
-  private final TalonFX driveMotor;   // Declare motor Dirves
+public class SwerveModule extends SubsystemBase {
+  private final TalonFX driveMotor; // Declare motor Dirves
   private final TalonFX turningMotor; // declare turning motor
 
-  public final CANcoder absoluteCaNcoder; //declare absolute canCoder
+  public final CANcoder absoluteCaNcoder; // declare absolute canCoder
 
   // velocity request drive
   private final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
@@ -61,15 +60,14 @@ public class SwerveModule extends SubsystemBase
       int turningMotorId,
       int absoluteEncoderId,
       Rotation2d absoluteEncoderOffset,
-      double chassisAngularOffset) 
-    {
-    this.angleOffset = absoluteEncoderOffset; //that is in rad
-    
-    //motors instances
+      double chassisAngularOffset) {
+    this.angleOffset = absoluteEncoderOffset; // that is in rad
+
+    // motors instances
     this.driveMotor = new TalonFX(driveMotorId, "rio");
     this.turningMotor = new TalonFX(turningMotorId, "rio");
 
-    //canCoder instance
+    // canCoder instance
     this.absoluteCaNcoder = new CANcoder(absoluteEncoderId);
 
     // intantiate SwerveModuleState
@@ -80,10 +78,10 @@ public class SwerveModule extends SubsystemBase
     initializeTurningMotor(); // 3. turning motor config
     initializeDriveMotor(); // 4. drive motor config
 
-    m_chassisAngularOffset = chassisAngularOffset;  // 5. Initialize chassi offset value config (rotation)
+    m_chassisAngularOffset = chassisAngularOffset; // 5. Initialize chassi offset value config (rotation)
 
     resetToAbsolute(); // 6.Load absolute CanCoder value to turning encoder
-    
+
     m_desiredState.angle = new Rotation2d(this.getTurningPositionRad()); // 7. Create desired angle
   }
 
@@ -92,8 +90,7 @@ public class SwerveModule extends SubsystemBase
    *
    * @return The current state of the module.
    */
-  public SwerveModulePosition getPosition() 
-  {
+  public SwerveModulePosition getPosition() {
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModulePosition(
@@ -106,12 +103,11 @@ public class SwerveModule extends SubsystemBase
   }
 
   /**
-   * Returns the current state of the module. (velocity and angle) 
+   * Returns the current state of the module. (velocity and angle)
    *
    * @return The current state of the module.
    */
-  public SwerveModuleState getState() 
-  {
+  public SwerveModuleState getState() {
     return new SwerveModuleState(this.getDriveVelocityMPS(),
         new Rotation2d(this.getTurningRotation() - m_chassisAngularOffset));
   }
@@ -121,12 +117,11 @@ public class SwerveModule extends SubsystemBase
    * 
    * @param state Desired state with speed and angle.
    */
-  public void setDesiredState(SwerveModuleState state) 
-  {
+  public void setDesiredState(SwerveModuleState state) {
     // Apply chassis angular offset to the desired state.
-    SwerveModuleState correctedDesiredState = new SwerveModuleState(); //instantiate new state
+    SwerveModuleState correctedDesiredState = new SwerveModuleState(); // instantiate new state
     correctedDesiredState.speedMetersPerSecond = state.speedMetersPerSecond; // copy speed
-    correctedDesiredState.angle = state.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset)); 
+    correctedDesiredState.angle = state.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
     // add chassis offset to angle
 
     /**
@@ -134,8 +129,8 @@ public class SwerveModule extends SubsystemBase
      * SwerveModuleState.optimize(correctedDesiredState,
      * new Rotation2d(turningEncoder.getPosition()));
      */
-    correctedDesiredState.optimize(new Rotation2d(this.getTurningPositionRad())); //optimize the state
-    correctedDesiredState.cosineScale(new Rotation2d(this.getTurningPositionRad())); //cosine scale the state
+    correctedDesiredState.optimize(new Rotation2d(this.getTurningPositionRad())); // optimize the state
+    correctedDesiredState.cosineScale(new Rotation2d(this.getTurningPositionRad())); // cosine scale the state
 
     /*
      * double driveVelocityRPS =
@@ -146,33 +141,34 @@ public class SwerveModule extends SubsystemBase
     double driveVelocityRPS = Conversions.MPSToRPS(correctedDesiredState.speedMetersPerSecond,
         ModuleConstants.kWheelCircumferenceMeters,
         ModuleConstants.kDriveMotorGearRatio);
-        
+
     // Set the motor outputs from the optimized state.
     driveMotor.setControl(m_request.withVelocity(driveVelocityRPS)); // set drive velocity
-    turningMotor.setControl(mmrequest.withPosition(correctedDesiredState.angle.getRotations())); // set turnig pid angle reference
+    turningMotor.setControl(mmrequest.withPosition(correctedDesiredState.angle.getRotations())); // set turnig pid angle
+                                                                                                 // reference
     // Save the desired state.
     m_desiredState = state;
   }
 
   private void initializeTurningMotor() {
-    //factore default
+    // factore default
     turningMotor.clearStickyFaults();
     this.turningMotor.getConfigurator().apply(new TalonFXConfiguration());
 
-    turningMotor.setNeutralMode(ModuleConstants.turningNeutralMode); //neutralMode = coast
+    turningMotor.setNeutralMode(ModuleConstants.turningNeutralMode); // neutralMode = coast
 
     TalonFXConfiguration tConfiguration = new TalonFXConfiguration(); // create a new config object
     CurrentLimitsConfigs currentLimitsConfigs = tConfiguration.CurrentLimits;
     currentLimitsConfigs.StatorCurrentLimit = ModuleConstants.kTurningMotorCurrentLimit; // set current limit 60
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
 
-    tConfiguration.Feedback.SensorToMechanismRatio = 1 / ModuleConstants.kTurningMotorGearRatio; //set gear ratio
+    tConfiguration.Feedback.SensorToMechanismRatio = 1 / ModuleConstants.kTurningMotorGearRatio; // set gear ratio
     tConfiguration.ClosedLoopGeneral.ContinuousWrap = true; // enable continuous wrap on the pid controller
 
-    //tConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    // tConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     tConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-    //put pid values constants
+    // put pid values constants
     tConfiguration.Slot0.kP = ModuleConstants.kPTurning;
     tConfiguration.Slot0.kD = ModuleConstants.kDTurning;
     tConfiguration.Slot0.kI = ModuleConstants.kITurning;
@@ -185,7 +181,7 @@ public class SwerveModule extends SubsystemBase
       if (status.isOK())
         break; // if apply is ok break the loop
     }
-    if (!status.isOK()) { //if not ok print the error 
+    if (!status.isOK()) { // if not ok print the error
       System.out.println("Could not apply swerve module configs, error code: " + status.toString());
     }
   }
@@ -201,14 +197,14 @@ public class SwerveModule extends SubsystemBase
     // Factory Default
     driveMotor.clearStickyFaults();
     this.driveMotor.getConfigurator().apply(new TalonFXConfiguration());
-    
+
     driveMotor.setNeutralMode(ModuleConstants.driveNeutralMode); // NeutralMode = Brake
 
     /* Configure a stator limit of 20 amps */
     TalonFXConfiguration toConfigure = new TalonFXConfiguration(); // create a new config object
     CurrentLimitsConfigs currentLimitConfigs = toConfigure.CurrentLimits;
-    currentLimitConfigs.StatorCurrentLimit = ModuleConstants.driveCurrentThreshold; //120 - current limit
-    currentLimitConfigs.StatorCurrentLimitEnable = ModuleConstants.driveEnableCurrentLimit; //true
+    currentLimitConfigs.StatorCurrentLimit = ModuleConstants.driveCurrentThreshold; // 120 - current limit
+    currentLimitConfigs.StatorCurrentLimitEnable = ModuleConstants.driveEnableCurrentLimit; // true
 
     toConfigure.Feedback.SensorToMechanismRatio = 1 / ModuleConstants.kDriveMotorGearRatio; // set gear ratio
     toConfigure.ClosedLoopGeneral.ContinuousWrap = true; // no continuous wrap on the pid controller
@@ -227,14 +223,14 @@ public class SwerveModule extends SubsystemBase
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     for (int i = 0; i < 5; ++i) {
       status = driveMotor.getConfigurator().apply(toConfigure); // apply the config to the motor
-      if (status.isOK())  // if ok - break
+      if (status.isOK()) // if ok - break
         break;
     }
     if (!status.isOK()) { // if not ok print the error
       System.out.println("Could not apply swerve module configs, error code: " + status.toString());
     }
 
-    driveMotor.setPosition(0); //reset encoder
+    driveMotor.setPosition(0); // reset encoder
   }
 
   /**
@@ -245,16 +241,16 @@ public class SwerveModule extends SubsystemBase
     absoluteCaNcoder.clearStickyFaults();
     absoluteCaNcoder.getConfigurator().apply(new CANcoderConfiguration());
 
-    var configs = new CANcoderConfiguration(); //new config object
+    var configs = new CANcoderConfiguration(); // new config object
 
     // Sensor direction
     configs.withMagnetSensor(
         new MagnetSensorConfigs().withSensorDirection(SensorDirectionValue.CounterClockwise_Positive));
 
-    // Speed up signals to an appropriate rate 
+    // Speed up signals to an appropriate rate
     absoluteCaNcoder.getPosition().setUpdateFrequency(100);
     absoluteCaNcoder.getVelocity().setUpdateFrequency(100);
-    
+
     // Set the absolute sensor range to 0-360 degrees.
     configs.MagnetSensor.withMagnetOffset(0);
 
@@ -264,6 +260,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Get canCoder value
+   * 
    * @return canCoder value as Rotation2d
    */
   public Rotation2d getCANcoder() {
@@ -272,6 +269,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Checks if cancoder getAbsolutePosition have an OK error code.
+   * 
    * @return true if all is good otherwise false
    */
   public boolean getCanCoderIsValid() {
@@ -280,11 +278,11 @@ public class SwerveModule extends SubsystemBase
 
   /* Initialize wheels positions */
   public void resetToAbsolute() {
-    //put absolute canCoder value to turning motor
-    turningMotor.setPosition(getCANcoder().getRotations() - angleOffset.getRotations()); 
+    // put absolute canCoder value to turning motor
+    turningMotor.setPosition(getCANcoder().getRotations() - angleOffset.getRotations());
   }
 
-  /** 
+  /**
    * @return canCoder degrees (0-360)°
    */
   public double canCoderDegrees() {
@@ -346,7 +344,8 @@ public class SwerveModule extends SubsystemBase
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+  }
 
   /**
    * @return driveMotor position as double
@@ -358,6 +357,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Get the turning position of the module
+   * 
    * @return turning position in degrees (0-360)°
    */
   public double getTurningPosition() {
@@ -366,6 +366,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Get the turning position of the module
+   * 
    * @return turning position in rotations
    */
   public double getTurningRotation() {
@@ -374,6 +375,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Get the turning position of the module
+   * 
    * @return getting position in radians
    */
   public double getTurningPositionRad() {
@@ -382,6 +384,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Get the drive velocity of the module
+   * 
    * @return drive velocity in meters per second
    */
   public double getDriveVelocityMPS() {
@@ -391,6 +394,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Get the turning velocity of the module
+   * 
    * @return turning velocity in degrees per second
    */
   public double getTurningVelocity() {
@@ -399,6 +403,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Get the drive motor current
+   * 
    * @return drive motor current in amps
    */
   public double getDriveCurrent() {
@@ -407,6 +412,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Get the turning motor current
+   * 
    * @return turning motor current in amps
    */
   public double getTurnCurrent() {
@@ -415,6 +421,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * Get the drive motor temperature
+   * 
    * @return drive motor temperature in celsius
    */
   public double getDriveTemperature() {
@@ -423,6 +430,7 @@ public class SwerveModule extends SubsystemBase
 
   /**
    * get drive motor voltage
+   * 
    * @return drive motor voltage as a double
    */
   public double getDriveVoltage() {
@@ -430,8 +438,8 @@ public class SwerveModule extends SubsystemBase
   }
 
   /**
-   *  @drive brake mode
-   *  @turn disable turning motor
+   * @drive brake mode
+   * @turn disable turning motor
    */
   public void stopMotors() {
     driveMotor.setControl(m_brake);
@@ -439,7 +447,7 @@ public class SwerveModule extends SubsystemBase
   }
 
   /**
-   *  @ disable motors
+   * @ disable motors
    */
   public void disableMotors() {
     driveMotor.set(0);

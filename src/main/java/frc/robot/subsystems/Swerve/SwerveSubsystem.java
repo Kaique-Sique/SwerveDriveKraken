@@ -109,7 +109,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Create speed booleans */
   private boolean throttleSlow = false, throttleFast = false, throttleMax = false, // Create speed booleans
-  isBlue = false, blueAlliance = false; // create blue alliance boolean
+      isBlue = false, blueAlliance = false; // create blue alliance boolean
 
   // PathPlanner Config
   RobotConfig config;
@@ -276,11 +276,11 @@ public class SwerveSubsystem extends SubsystemBase {
     // LimelightHelpers.getBotPose(DriveConstants.limelightFront)[5]);
     SmartDashboard.putNumber("PoseEstimator /Rotation (degrees)", this.getPoseEstimator().getRotation().getDegrees());
     SmartDashboard.putBoolean("isBlue", isBlue);
-    SmartDashboard.putNumber("Pigeon 7563 Yaw", gyro.getYaw().getValueAsDouble()); 
+    SmartDashboard.putNumber("Pigeon 7563 Yaw", gyro.getYaw().getValueAsDouble());
     SmartDashboard.putNumber("Pigeon 7563 Rotation", gyro.getRotation2d().getDegrees());
 
-    //gyro Calibration with no motion
-    SmartDashboard.putNumber("Pigeon 7563 No motion", gyro.getNoMotionCount().getValueAsDouble()); 
+    // gyro Calibration with no motion
+    SmartDashboard.putNumber("Pigeon 7563 No motion", gyro.getNoMotionCount().getValueAsDouble());
 
     SmartDashboard.putNumber("Translation 2d X", this.getFieldRelativeSpeeds().getX());
     SmartDashboard.putNumber("Translation 2d Y", this.getFieldRelativeSpeeds().getY());
@@ -322,10 +322,10 @@ public class SwerveSubsystem extends SubsystemBase {
       // SmartDashboard.putNumber("Module " + i + " /Angle (rad)",
       // moduleStates[i].angle.getRadians());
     }
-    // Publish the pose to NetworkTables 
+    // Publish the pose to NetworkTables
     publisher.set(getPoseEstimator());
     chassisPublisher.set(getChassisSpeeds());
-    swPublisher.set(moduleStates);
+    swPublisher.set(getModuleStates());
     swDesiredPublisher.set(getModuleDisiredStates());
   }
 
@@ -370,7 +370,7 @@ public class SwerveSubsystem extends SubsystemBase {
               .getDegrees(),
           0, 0, 0, 0, 0);
 
-          LimelightHelpers.SetRobotOrientation(DriveConstants.limelightLeft,
+      LimelightHelpers.SetRobotOrientation(DriveConstants.limelightLeft,
           m_poseEstimator
               .getEstimatedPosition()
               .getRotation()
@@ -387,7 +387,7 @@ public class SwerveSubsystem extends SubsystemBase {
       LimelightHelpers.PoseEstimate leftLimelight = LimelightHelpers
           .getBotPoseEstimate_wpiBlue_MegaTag2(DriveConstants.limelightLeft);
 
-      // Reject vision updates if the robot is rotating too fast 
+      // Reject vision updates if the robot is rotating too fast
       if (Math.abs(gyro.getAngularVelocityZDevice().refresh().getValueAsDouble()) > 720) {
         doRejectUpdate = true;
       }
@@ -567,6 +567,7 @@ public class SwerveSubsystem extends SubsystemBase {
       modules[i].stopMotors();
     }
   }
+
   /**
    * @ disable all modules with no BRAKES
    */
@@ -618,16 +619,6 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
-  public void robotLiftVelocity() {
-    throttleSlow = false;
-    throttleFast = false;
-    throttleMax = false;
-
-    for (int i = 0; i < 3; i++) {
-      System.out.println("Velocity 10% Max");
-    }
-  }
-
   // Set the wheels in an "X" formation to resist being pushed
   public void setX() {
     SwerveModuleState[] xStates = new SwerveModuleState[4];
@@ -668,7 +659,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveModuleState[] getModuleDisiredStates() {
     SwerveModuleState[] states = new SwerveModuleState[modules.length];
     for (int i = 0; i < modules.length; i++) {
-      states[i] = modules[i].getState();
+      states[i] = modules[i].getDesiredState();
     }
     return states;
   }
@@ -759,8 +750,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     configs.Pigeon2Features.DisableNoMotionCalibration = false;
 
-    //gyro calibration values for acumulate error in a rotation
-    configs.GyroTrim.GyroScalarX = -2.9779; 
+    // gyro calibration values for acumulate error in a rotation
+    configs.GyroTrim.GyroScalarX = -2.9779;
     configs.GyroTrim.GyroScalarY = -2.9779;
     configs.GyroTrim.GyroScalarZ = -2.9779;
 

@@ -7,9 +7,6 @@ package frc.robot;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -39,27 +36,8 @@ public class Robot extends TimedRobot {
    * This is the constructor for the Robot class. It sets the period for the robot
    * to 10ms (100Hz).
    */
-
-  // Creates UsbCamera
-  UsbCamera usbCamera;
-
   public Robot() {
-    // Creates UsbCamera
-    // Configure camera
-    usbCamera = CameraServer.startAutomaticCapture();
-    // Set the resolution
-    usbCamera.setResolution(640, 480);
-    // Set the frames per second
-    usbCamera.setFPS(30);
-    // Set the pixel format
-    usbCamera.setPixelFormat(PixelFormat.kMJPEG);
-
-    usbCamera.setExposureAuto();
-    usbCamera.setBrightness(10);
-    usbCamera.setExposureManual(50);
-    usbCamera.setWhiteBalanceAuto();
     // Call the superclass constructor with a period of 0.01 seconds (10ms).
-    // super(0.01); // Set the period to 10ms (100Hz)
   }
 
   /**
@@ -103,35 +81,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler. This is responsible for polling buttons, adding
-    // newly-scheduled
-    // commands, running already-scheduled commands, removing finished or
-    // interrupted commands,
-    // and running subsystem periodic() methods. This must be called from the
-    // robot's periodic
-    // block in order for anything in the Command-based framework to work.
-
     CommandScheduler.getInstance().run();
     SmartDashboard.putNumber("Match time", DriverStation.getMatchTime());
     SmartDashboard.putNumber("Batery Voltage", RobotController.getBatteryVoltage());
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
-
-    // System.out.println("Touch X: " +
-    // SelectScore.poseToScore(RobotContainer.touchScreenInterface).getX());
-    // System.out.println("Touch Y: " +
-    // SelectScore.poseToScore(RobotContainer.touchScreenInterface).getY());
-    // System.out.println("Touch Rot: " +
-    // SelectScore.poseToScore(RobotContainer.touchScreenInterface).getRotation().getDegrees());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
-    // 01/25/2025 MNL
-    // This is a test to see if we can get the limelight values when the robot is
-    // disabled
-    // LimelightHelpers.getLatestResults(DriveConstants.limelightFront);
-    // LimelightHelpers.getLatestResults(DriveConstants.limelightBack);
   }
 
   @Override
@@ -146,14 +104,9 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
-    // RobotContainer.coralSubsystem.runMotor(0);
-    // RobotContainer.initializeRamp.schedule();
-    // RobotContainer.swerveDrive.zeroHeading();
-
     LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 2);
   }
 
@@ -171,8 +124,6 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    // RobotContainer.homingEndGame.schedule();
-    // RobotContainer.initializeRamp.schedule();
   }
 
   /** This function is called periodically during operator control. */
