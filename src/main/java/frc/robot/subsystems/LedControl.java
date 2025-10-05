@@ -18,9 +18,7 @@ public class LedControl extends SubsystemBase {
   private boolean ledsOn = true;
 
   public LedControl() {
-
     // Blue and Green are inverted
-
     // PWM port 9
     // Must be a PWM header, not MXP or DIO
     m_led = new AddressableLED(0);
@@ -34,13 +32,11 @@ public class LedControl extends SubsystemBase {
     // Set the data
     m_led.setData(m_ledBuffer);
     m_led.start();
-
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
     if (ledsOn) {
       setRainbow();
       ledsOn = false;
@@ -57,19 +53,15 @@ public class LedControl extends SubsystemBase {
       m_ledBuffer.setRGB(i, 255, 0, 0);
     }
     m_led.setData(m_ledBuffer);
-
   }
 
   public void setOrangeLed() {
-
     for (var i = 0; i < m_ledBuffer.getLength(); i++) {
       // Sets the specified LED to the RGB values for red
       // green e blue invertidos
       m_ledBuffer.setRGB(i, 255, 0, 165);
-
     }
     m_led.setData(m_ledBuffer);
-
   }
 
   // Sets the LED color to blue
@@ -79,7 +71,6 @@ public class LedControl extends SubsystemBase {
       m_ledBuffer.setRGB(i, 0, 255, 0);
     }
     m_led.setData(m_ledBuffer);
-
   }
 
   // Sets the LED color to green
@@ -88,7 +79,6 @@ public class LedControl extends SubsystemBase {
       m_ledBuffer.setRGB(i, 0, 0, 255);
     }
     m_led.setData(m_ledBuffer);
-
   }
 
   public void setPinkLed() {
@@ -105,7 +95,6 @@ public class LedControl extends SubsystemBase {
       m_ledBuffer.setRGB(i, 255, 0, 255);
     }
     m_led.setData(m_ledBuffer);
-
   }
 
   // Sets the LED color to purple
@@ -115,7 +104,6 @@ public class LedControl extends SubsystemBase {
       m_ledBuffer.setRGB(i, 128, 128, 0);
     }
     m_led.setData(m_ledBuffer);
-
   }
 
   // Sets the LED color to white
@@ -124,7 +112,6 @@ public class LedControl extends SubsystemBase {
       m_ledBuffer.setRGB(i, 255, 255, 255);
     }
     m_led.setData(m_ledBuffer);
-
   }
 
   // Sets the LED color to black
@@ -134,7 +121,6 @@ public class LedControl extends SubsystemBase {
       m_ledBuffer.setRGB(i, 0, 0, 0);
     }
     m_led.setData(m_ledBuffer);
-
   }
 
   public void setRainbow() {
@@ -153,5 +139,4 @@ public class LedControl extends SubsystemBase {
 
     m_led.setData(m_ledBuffer);
   }
-
 }
