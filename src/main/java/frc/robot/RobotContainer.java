@@ -31,16 +31,14 @@ public class RobotContainer {
   public static CommandXboxController driverJoystick = new CommandXboxController(
       JoystickDriverConstants.kDriverControllerPort);
 
-  public static CommandXboxController operatorJoystick = new CommandXboxController(1);
-
-  // Put all subsystems here
+  // Put all subsystems here...
   public static LimelightHelpers limelightHelpers = new LimelightHelpers();
   public static LedControl ledControl = new LedControl();
 
   // Swerve Drive
   public static SwerveSubsystem swerveDrive = new SwerveSubsystem();
 
-  // Put all commands here
+  // Put all commands here...
 
   // Create an auto chooser to autonomus mode
   SendableChooser<Command> chooserAuto;
