@@ -4,16 +4,22 @@
 
 package frc.robot;
 
+import java.util.function.Supplier;
+
 //CTRE Imports
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.config.PIDConstants;
+
+import edu.wpi.first.epilogue.logging.FileBackend;
+import edu.wpi.first.math.geometry.Pose2d;
 //WPI Imports
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.PneumaticsControlModule;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -68,17 +74,17 @@ public final class Constants {
      **************************************/
 
     // 14,285%
-    public static final double kPTurning = 22.88;// ANTERIOR 0,5 //0,25 ; 0.2142875; 0.175; 0.125; 0.23
+    public static final double kPTurning = 64.887245;// ANTERIOR 0,5 //0,25 ; 0.2142875; 0.175; 0.125; 0.23
     public static final double kITurning = 0;
-    public static final double kDTurning = 0.3762;
+    public static final double kDTurning = 2.529675;
 
     // The F parameter should only be set when using a velocity-based PID
     // controller,
     // and should be set to zero otherwise to avoid unwanted behavior.
     public static final double kTurningFF = 0; // 1.0/473.0; //
 
-    public static final double kTurningKS = 1.08;
-    public static final double kTurningKV = 1.376;
+    public static final double kTurningKS = 0.3064;
+    public static final double kTurningKV = 1.60;
     public static final double kTurningKA = 0.0;
 
     public static final double kTurningMinOutput = -1;
@@ -91,13 +97,13 @@ public final class Constants {
      * @category Drive Motor Characterization Values From SYSID
      *           TO DO: This must be tuned to specific robot
      ************************************************************/
-    public static final double driveKS = 0.2020;// <-MNL 11/11/2024 0.1; //0.32; // Add 0.1 V output to overcome static
+    public static final double driveKS = 0.15;// <-MNL 11/11/2024 0.1; //0.32; // Add 0.1 V output to overcome static
                                                 // friction
-    public static final double driveKV = 0.7524; // 1.51; // A velocity target of 1 rps results in 0.12 V output
+    public static final double driveKV = 0.73; // 1.51; // A velocity target of 1 rps results in 0.12 V output
     public static final double driveKA = 0.0; // 0.27;
 
     // 11,69%
-    public static final double kPdriving = 0.6;// <--MNL11/11/2024 0.0665;//ANTERIOR 0,0665 ; 0.05872615 // kP = 0.11 An
+    public static final double kPdriving = 0.31;// <--MNL11/11/2024 0.0665;//ANTERIOR 0,0665 ; 0.05872615 // kP = 0.11 An
                                                // error of 1 rps results in 0.11 V output
     public static final double kIdriving = 0.0;
     public static final double kDdriving = 0.0;
@@ -305,7 +311,9 @@ public final class Constants {
 
     // Poses to alliance blue
     public static final class BluePose2d {
-      // implement the positions here
+      //exemple position
+      public static final Pose2d front18 = new Pose2d(
+        new Translation2d(2.53, 2.75), Rotation2d.fromDegrees(0));
     }
   }
 }

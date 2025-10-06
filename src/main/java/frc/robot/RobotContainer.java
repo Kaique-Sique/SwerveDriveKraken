@@ -4,15 +4,17 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 //WPILIB Imports
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 //Robot Imports
 import frc.robot.Constants.OIConstants.JoystickDriverConstants;
+import frc.robot.Constants.Pose2dConstansts.BluePose2d;
 import frc.robot.Limelight.LimelightHelpers;
 import frc.robot.subsystems.LedControl;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
@@ -41,15 +43,15 @@ public class RobotContainer {
   // Put all commands here...
 
   // Create an auto chooser to autonomus mode
-  SendableChooser<Command> chooserAuto;
+  //SendableChooser<Command> chooserAuto;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    SmartDashboard.putData("Autonomous", chooserAuto);
-    chooserAuto.addOption(null, getAutonomousCommand());
+    //SmartDashboard.putData("Autonomous", chooserAuto);
 
+    //chooserAuto = AutoBuilder.buildAutoChooser();
     // Configure the button bindings
     configureBindings();
 
@@ -89,12 +91,9 @@ public class RobotContainer {
     // zero heading - swerve modules to 0 degrees
     driverJoystick.start().onTrue(new InstantCommand(swerveDrive::zeroHeading));
 
-    // here you can implement generic positons to go to with buttons
-    if (swerveDrive.getBlueAlliance()) {
-      // here to blue aliance positions
-    } else {
-      // here to red aliance positions
-    }
+    driverJoystick.x().whileTrue(
+                swerveDrive.driveToThePoint(()-> new Pose2d(new Translation2d(2.53, 3.85), 
+                Rotation2d.fromDegrees(0))));
   }
 
   /**
@@ -104,6 +103,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // choose the auto command from dashboard
-    return chooserAuto.getSelected();
+    return null;
   }
 }

@@ -92,6 +92,13 @@ public class SwerveSubsystem extends SubsystemBase {
       DriveConstants.angleOffsetBRTurning,
       DriveConstants.kBackRightChassisAngularOffset);
 
+   SwerveModuleState[] states = new SwerveModuleState[] {
+              new SwerveModuleState(),
+              new SwerveModuleState(),
+              new SwerveModuleState(),
+              new SwerveModuleState()
+   };
+
   // Create Pigeon gyro
   Pigeon2 gyro = new Pigeon2(DriveConstants.kPigeonPort, "rio");
 
@@ -130,16 +137,6 @@ public class SwerveSubsystem extends SubsystemBase {
   // Robot Pose2d
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("Swerve/MyPose", Pose2d.struct).publish();
-
-  // limelight left pose 2d
-  StructPublisher<Pose2d> poseLeftCamPublisher = NetworkTableInstance.getDefault()
-      .getStructTopic("Swerve/LeftCamPose", Pose2d.struct).publish();
-  // limelight front pose 2d
-  StructPublisher<Pose2d> poseFrontCamPublisher = NetworkTableInstance.getDefault()
-      .getStructTopic("Swerve/FrontCamPose", Pose2d.struct).publish();
-  // limelight back pose 2d
-  StructPublisher<Pose2d> poseBackCamPublisher = NetworkTableInstance.getDefault()
-      .getStructTopic("Swerve/BackCamPose", Pose2d.struct).publish();
 
   /** Swerve NT Data publisher - swerveModule states **/
   StructArrayPublisher<SwerveModuleState> swPublisher = NetworkTableInstance.getDefault()
@@ -309,7 +306,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     // Output Module States to SmartDashboard
     SwerveModuleState[] moduleStates = getModuleStates();
-    SwerveModuleState[] desiredStates = getModuleDisiredStates();
     for (int i = 0; i < moduleStates.length; i++) {
       SmartDashboard.putNumber("Module " + i + " /Speed (m/s)", moduleStates[i].speedMetersPerSecond);
       // SmartDashboard.putNumber("Module " + i + " /Angle (rad)",
@@ -319,11 +315,8 @@ public class SwerveSubsystem extends SubsystemBase {
     publisher.set(getPoseEstimator());
     chassisPublisher.set(this.getChassisSpeeds());
     swPublisher.set(moduleStates);
-    swDesiredPublisher.set(desiredStates);
+    swDesiredPublisher.set(states);
     rotation2dPublisher.set(this.getPoseEstimator().getRotation());
-    poseFrontCamPublisher.set(this.visionPose2d(DriveConstants.limelightFront));
-    poseLeftCamPublisher.set(this.visionPose2d(DriveConstants.limelightLeft));
-    poseBackCamPublisher.set(this.visionPose2d(DriveConstants.limelightBack));
   }
 
   private void initializeAliance() {
@@ -501,16 +494,6 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
-  public Pose2d visionPose2d(String limelightName) {
-    double[] botPose = LimelightHelpers.getBotPose(limelightName);
-
-    Pose2d visionPose = new Pose2d(
-        botPose[0], // x in metters
-        botPose[1], // y metters
-        Rotation2d.fromDegrees(botPose[5]));
-    return visionPose;
-  }
-
   /**
    * 
    * @return blue alliance true/false
@@ -658,6 +641,8 @@ public class SwerveSubsystem extends SubsystemBase {
     for (int i = 0; i < modules.length; i++) {
       modules[i].setDesiredState(desiredStates[i]);
     }
+
+    states = desiredStates;
   }
 
   /**
@@ -729,7 +714,7 @@ public class SwerveSubsystem extends SubsystemBase {
     double ySpeed = ySpdFunction.get();
     double turningSpeed = turningSpdFunction.get();
     // boolean fieldOriented = fieldOrientedFunction.get();
-    double throttle = 0.3; // initial speed
+    double throttle = 0.2; // initial speed
 
     // Selects speed
     // If its necessary you can add another option of speed,
