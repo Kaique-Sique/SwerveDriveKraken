@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 //WPILIB Imports
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -15,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 //Robot Imports
 import frc.robot.Constants.OIConstants.JoystickDriverConstants;
 import frc.robot.Limelight.LimelightHelpers;
+import frc.robot.Utils.FieldPoses;
 import frc.robot.subsystems.LedControl;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 
@@ -91,8 +89,7 @@ public class RobotContainer {
     driverJoystick.start().onTrue(new InstantCommand(swerveDrive::zeroHeading));
 
     driverJoystick.x().whileTrue(
-                swerveDrive.driveToThePoint(()-> new Pose2d(new Translation2d(2.53, 3.85), 
-                Rotation2d.fromDegrees(0))));
+                swerveDrive.driveToThePoint(()-> FieldPoses.front18));
   }
 
   /**

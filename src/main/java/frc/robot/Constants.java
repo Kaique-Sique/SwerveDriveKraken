@@ -8,7 +8,6 @@ package frc.robot;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.config.PIDConstants;
-import edu.wpi.first.math.geometry.Pose2d;
 //WPI Imports
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -295,20 +294,5 @@ public final class Constants {
    *************************************************************************************************************************************/
   public static final class KrakenMotorConstants {
     public static final double kFreeSpeedRpm = 6000;
-  }
-
-  // Poses Constants for Autonomous and Teleop positions
-  public static final class Pose2dConstansts {
-    // Poses to alliance red
-    public static final class RedsPose2d {
-      // implement the positions here
-    }
-
-    // Poses to alliance blue
-    public static final class BluePose2d {
-      //exemple position
-      public static final Pose2d front18 = new Pose2d(
-        new Translation2d(2.53, 2.75), Rotation2d.fromDegrees(0));
-    }
   }
 }

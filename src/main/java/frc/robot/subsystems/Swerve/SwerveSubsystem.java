@@ -390,6 +390,11 @@ public class SwerveSubsystem extends SubsystemBase {
       LimelightHelpers.PoseEstimate leftLimelight = LimelightHelpers
           .getBotPoseEstimate_wpiBlue_MegaTag2(DriveConstants.limelightLeft);
 
+      if(leftLimelight.tagCount > 0)
+      {
+        System.out.println("tag encontrada");
+      }
+
       // Reject vision updates if the robot is rotating too fast
       if (Math.abs(gyro.getAngularVelocityZDevice().refresh().getValueAsDouble()) > 720) {
         doRejectUpdate = true;
@@ -926,7 +931,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public Command driveToThePoint(Supplier<Pose2d> poseSupplier) {
     PathPlannerPath.clearCache();
     PathConstraints telePathConstraints = new PathConstraints(1,
-        0.25,
+        1,
         Math.PI,
         Math.PI);
 
