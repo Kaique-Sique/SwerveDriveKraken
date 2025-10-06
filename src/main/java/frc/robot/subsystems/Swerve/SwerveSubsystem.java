@@ -927,8 +927,8 @@ public class SwerveSubsystem extends SubsystemBase {
     PathPlannerPath.clearCache();
     PathConstraints telePathConstraints = new PathConstraints(1,
         0.25,
-        2 * Math.PI,
-        4 * Math.PI);
+        Math.PI,
+        Math.PI);
 
     return new DeferredCommand(() -> AutoBuilder
         .pathfindToPose(poseSupplier.get(), telePathConstraints), Set.of(this));
