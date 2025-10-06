@@ -43,7 +43,7 @@ import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
-
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
@@ -109,7 +109,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Create speed booleans */
   private boolean throttleSlow = false, throttleFast = false, throttleMax = false, // Create speed booleans
-      isBlue = false, blueAlliance = false; // create blue alliance boolean
+      isBlue = false, blueAlliance = false, isAlliancePresent = false;
 
   // PathPlanner Config
   RobotConfig config;
@@ -127,21 +127,21 @@ public class SwerveSubsystem extends SubsystemBase {
   // You can use this values on advanced scope from wpi
 
   /**** Robot Poses 2D ****/
-  //Robot Pose2d
+  // Robot Pose2d
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("Swerve/MyPose", Pose2d.struct).publish();
 
-  //limelight left pose 2d
+  // limelight left pose 2d
   StructPublisher<Pose2d> poseLeftCamPublisher = NetworkTableInstance.getDefault()
       .getStructTopic("Swerve/LeftCamPose", Pose2d.struct).publish();
-  //limelight front pose 2d
+  // limelight front pose 2d
   StructPublisher<Pose2d> poseFrontCamPublisher = NetworkTableInstance.getDefault()
       .getStructTopic("Swerve/FrontCamPose", Pose2d.struct).publish();
-   //limelight back pose 2d
+  // limelight back pose 2d
   StructPublisher<Pose2d> poseBackCamPublisher = NetworkTableInstance.getDefault()
       .getStructTopic("Swerve/BackCamPose", Pose2d.struct).publish();
 
-  /**Swerve NT Data publisher - swerveModule states**/
+  /** Swerve NT Data publisher - swerveModule states **/
   StructArrayPublisher<SwerveModuleState> swPublisher = NetworkTableInstance.getDefault()
       .getStructArrayTopic("Swerve/MyStatesMeasured", SwerveModuleState.struct).publish();
 
@@ -195,33 +195,18 @@ public class SwerveSubsystem extends SubsystemBase {
      * value.
      * 2 - Use internal IMU for MT2 localization.
      */
-    LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 1);
 
-    // !!!! Confirmar com o marcio se os valores estao certos e posso fazer essa
-    // mudanca!!!
+    // limelight config
+    LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 1);
     LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightFront, 0.110, 0.259, 0.410, 0, 0, 0);
-    LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightLeft, 0.130, -0.259, 0.6, 0, 0, 0);
+    LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightLeft, 0.191, -0.25, 0.524, 0, 0, 0);
     LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightBack, 0.130, 0.259, 0.870, 0, 25, 180);
     LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 2);
-
-    // Robot Front is allways towards to red wall
-    var alliance2 = DriverStation.getAlliance();
-    if (alliance2.get() == DriverStation.Alliance.Red) {
-      allianceHeading = 0;
-      blueAlliance = false;
-      System.out.println("limelight settings Red");
-
-    } else {
-      // blue
-      allianceHeading = 180;
-      blueAlliance = true;
-      System.out.println("limelight settings Blue");
-    }
 
     // Initialize pose estimator ALWAYS towards to red wall
     m_poseEstimator = new SwerveDrivePoseEstimator(
         DriveConstants.kDriveKinematics,
-        Rotation2d.fromDegrees(allianceHeading), // gyro.getRotation2d(),
+        gyro.getRotation2d(),
         new SwerveModulePosition[] {
             frontLeftModule.getPosition(),
             frontRightModule.getPosition(),
@@ -270,6 +255,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+    initializeAliance();
+
     this.updatePoseEstimator();
     this.addPoseVision();
 
@@ -336,6 +324,19 @@ public class SwerveSubsystem extends SubsystemBase {
     poseFrontCamPublisher.set(this.visionPose2d(DriveConstants.limelightFront));
     poseLeftCamPublisher.set(this.visionPose2d(DriveConstants.limelightLeft));
     poseBackCamPublisher.set(this.visionPose2d(DriveConstants.limelightBack));
+  }
+
+  private void initializeAliance() {
+    if (!isAlliancePresent && DriverStation.getAlliance().isPresent()) {
+      Translation2d posPose = this.getPoseEstimator().getTranslation();
+      m_poseEstimator.resetPosition(gyro.getRotation2d(),
+          getModulesPosition(),
+          new Pose2d(posPose,
+              new Rotation2d(DriverStation.getAlliance().get() == Alliance.Blue
+                  ? Math.PI
+                  : 0)));
+      isAlliancePresent = true;
+    }
   }
 
   /** Updates the field relative position of the robot. */
@@ -500,22 +501,20 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
-  public Pose2d visionPose2d(String limelightName)
-  {
+  public Pose2d visionPose2d(String limelightName) {
     double[] botPose = LimelightHelpers.getBotPose(limelightName);
 
     Pose2d visionPose = new Pose2d(
-      botPose[0], // x in metters
-      botPose[1], // y metters
-      Rotation2d.fromDegrees(botPose[5])
-    );
+        botPose[0], // x in metters
+        botPose[1], // y metters
+        Rotation2d.fromDegrees(botPose[5]));
     return visionPose;
   }
 
   /**
    * 
    * @return blue alliance true/false
-   */  
+   */
   public boolean getBlueAlliance() {
     return blueAlliance;
   }
@@ -564,12 +563,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public void resetOdometry(Pose2d pose) {
     m_poseEstimator.resetPosition(
         gyro.getRotation2d(), // arrow usa gyro.getAngle() ///getGyroYaw()
-        new SwerveModulePosition[] {
-            frontLeftModule.getPosition(),
-            frontRightModule.getPosition(),
-            backLeftModule.getPosition(),
-            backRightModule.getPosition()
-        },
+        this.getModulesPosition(),
         pose);
   }
 
@@ -667,7 +661,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   *  Get swerve module status on real time
+   * Get swerve module status on real time
    * 
    * @return states
    */
@@ -679,9 +673,16 @@ public class SwerveSubsystem extends SubsystemBase {
     return states;
   }
 
+  public SwerveModulePosition[] getModulesPosition() {
+    SwerveModulePosition[] states = new SwerveModulePosition[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      states[i] = modules[i].getPosition();
+    }
+    return states;
+  }
 
   /**
-   * Get Swerve module desired status 
+   * Get Swerve module desired status
    * 
    * @return desired status
    */
@@ -727,12 +728,12 @@ public class SwerveSubsystem extends SubsystemBase {
     double xSpeed = xSpdFunction.get();
     double ySpeed = ySpdFunction.get();
     double turningSpeed = turningSpdFunction.get();
-    //boolean fieldOriented = fieldOrientedFunction.get();
+    // boolean fieldOriented = fieldOrientedFunction.get();
     double throttle = 0.3; // initial speed
 
     // Selects speed
-    //If its necessary you can add another option of speed, 
-    //on the 2025 season we use it when we call the lift
+    // If its necessary you can add another option of speed,
+    // on the 2025 season we use it when we call the lift
     if (throttleSlow) {
       throttle = 0.30;
     } else if (throttleFast) {
