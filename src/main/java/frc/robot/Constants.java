@@ -258,7 +258,7 @@ public final class Constants {
   public static final class PathPlannerConstants {
     public static final double kPTranslationPath = 2.5;// Anterior 0.125,
     public static final double kITranslationPath = 0;
-    public static final double kPRotationPath = 1.4;// 3.0; //3.0; 1.6
+    public static final double kPRotationPath = 2;// 3.0; //3.0; 1.6
 
     public static final PPHolonomicDriveController AutoConfig = new PPHolonomicDriveController( // PPHolonomicController
                                                                                                 // is the built in path
