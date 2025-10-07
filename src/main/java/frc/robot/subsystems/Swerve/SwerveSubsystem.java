@@ -492,6 +492,104 @@ public class SwerveSubsystem extends SubsystemBase {
           }
         }
       }
+      /** 
+       * checks if just left and front cam work
+       */
+      if (rearLimelight == null && frontLimelight != null && leftLimelight != null) 
+        {
+          if (leftLimelight.tagCount == 0 && frontLimelight.tagCount == 0) {
+            doRejectUpdate = true;
+          }
+          if (!doRejectUpdate){
+          if (frontLimelight.tagCount > 0 && leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3
+              && frontLimelight.avgTagDist < 3) {
+            // Both cameras have valid measurements, choose the one with the higher tag
+            // count
+            bestMeasurement = (frontLimelight.avgTagArea >= leftLimelight.avgTagArea) ? frontLimelight : leftLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+
+          }
+          else if (frontLimelight.tagCount > 0 && frontLimelight.avgTagDist < 3) {
+            bestMeasurement = frontLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+
+          }
+          else if (leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3) {
+            bestMeasurement = leftLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+            
+          }
+        }
+      }
+
+      /** 
+       * checks if just rear and front cam work
+       */
+      if (rearLimelight != null && frontLimelight != null && leftLimelight == null) 
+        {
+          if (rearLimelight.tagCount == 0 && frontLimelight.tagCount == 0) {
+            doRejectUpdate = true;
+          }
+          if (!doRejectUpdate){
+          if (frontLimelight.tagCount > 0 && rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3
+              && frontLimelight.avgTagDist < 3) {
+            // Both cameras have valid measurements, choose the one with the higher tag
+            // count
+            bestMeasurement = (frontLimelight.avgTagArea >= rearLimelight.avgTagArea) ? frontLimelight : rearLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+
+          }
+          else if (frontLimelight.tagCount > 0 && frontLimelight.avgTagDist < 3) {
+            bestMeasurement = frontLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+
+          }
+          else if (rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3) {
+            bestMeasurement = rearLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+            
+          }
+        }
+      }
+
+      /** 
+       * checks if just rear and left cam work
+       */
+      if (rearLimelight != null && frontLimelight == null && leftLimelight != null) 
+        {
+          if (rearLimelight.tagCount == 0 && leftLimelight.tagCount == 0) {
+            doRejectUpdate = true;
+          }
+          if (!doRejectUpdate){
+          if (leftLimelight.tagCount > 0 && rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3
+              && leftLimelight.avgTagDist < 3) {
+            // Both cameras have valid measurements, choose the one with the higher tag
+            // count
+            bestMeasurement = (leftLimelight.avgTagArea >= rearLimelight.avgTagArea) ? leftLimelight : rearLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+
+          }
+          else if (leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3) {
+            bestMeasurement = leftLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+
+          }
+          else if (rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3) {
+            bestMeasurement = rearLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+            
+          }
+        }
+      }
 
       /**
        * Checks if only the rear Limelight camera is connected and has valid
@@ -511,7 +609,7 @@ public class SwerveSubsystem extends SubsystemBase {
       }
 
       /**
-       * Checks if only the rear Limelight camera is connected and has valid
+       * Checks if only the left Limelight camera is connected and has valid
        * measurements.
        */
       if (rearLimelight == null && frontLimelight == null && leftLimelight != null) {
