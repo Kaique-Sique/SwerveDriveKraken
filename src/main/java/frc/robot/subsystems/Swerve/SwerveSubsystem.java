@@ -7,9 +7,12 @@ package frc.robot.subsystems.Swerve;
 import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.io.ObjectInputFilter.Config;
 import java.util.Set;
 //JAVA Imports
 import java.util.function.Supplier;
+
+import javax.crypto.spec.DESKeySpec;
 
 import com.ctre.phoenix6.StatusCode;
 
@@ -19,6 +22,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -37,6 +41,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
@@ -58,6 +63,7 @@ import frc.robot.Constants.PathPlannerConstants;
 import frc.robot.Limelight.LimelightHelpers;
 
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.OIConstants;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -119,8 +125,21 @@ public class SwerveSubsystem extends SubsystemBase {
       isBlue = false, blueAlliance = false, isAlliancePresent = false;
 
   // PathPlanner Config
-  RobotConfig config;
+  private RobotConfig config = new RobotConfig(
+                        PathPlannerConstants.robotMass,
+                        PathPlannerConstants.MOI, 
 
+                          new ModuleConfig(ModuleConstants.kWheelDiameterMeters, 
+                              ModuleConstants.maxDriveVelocityMPS, 
+                              ModuleConstants.wheelCOF, 
+                              DCMotor.getKrakenX60(1).withReduction(ModuleConstants.gearBox), 
+                              ModuleConstants.driveCurrentLimit, 1), 
+
+        new Translation2d(DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2), // + - antes
+        new Translation2d(DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2), // + + antes
+        new Translation2d(-DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2), // - - antes
+        new Translation2d(-DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2));
+        
   // Select alliance heading - default is blue
   private double allianceHeading = 0;
 

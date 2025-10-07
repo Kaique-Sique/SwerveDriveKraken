@@ -118,6 +118,12 @@ public final class Constants {
 
     public static double kDriveClosedLoopRamp = 0.25;
 
+    public static double maxDriveVelocityMPS = 5;
+
+    public static double wheelCOF = 1.200;
+
+    public static double gearBox = 6.12;
+
     /* Neutral Modes */
     public static final NeutralModeValue kTurningMotorIdleMode = NeutralModeValue.Coast; // template was coast SparkMax
     public static final NeutralModeValue driveNeutralMode = NeutralModeValue.Brake; // TalonFx
@@ -266,6 +272,10 @@ public final class Constants {
     public static final double maxAccelerationPath = 1;// 1.75//1.0//5.0 //3.0
     public static final double maxAngularVelocityRadPerSec = Units.degreesToRadians(540);
     public static final double maxAngularAccelerationRadPerSecSq = Units.degreesToRadians(720);
+
+    public static final double robotMass = 64;
+    public static final double MOI = 4;
+
   }
 
   // OI Constants
