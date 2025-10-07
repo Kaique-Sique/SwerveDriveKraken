@@ -7,6 +7,7 @@ package frc.robot.subsystems.Swerve;
 import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.net.SocketImpl;
 import java.util.Set;
 //JAVA Imports
 import java.util.function.Supplier;
@@ -95,12 +96,12 @@ public class SwerveSubsystem extends SubsystemBase {
       DriveConstants.angleOffsetBRTurning,
       DriveConstants.kBackRightChassisAngularOffset);
 
-   SwerveModuleState[] states = new SwerveModuleState[] {
-              new SwerveModuleState(),
-              new SwerveModuleState(),
-              new SwerveModuleState(),
-              new SwerveModuleState()
-   };
+  SwerveModuleState[] states = new SwerveModuleState[] {
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState()
+  };
 
   // Create Pigeon gyro
   Pigeon2 gyro = new Pigeon2(DriveConstants.kPigeonPort, "rio");
@@ -225,23 +226,18 @@ public class SwerveSubsystem extends SubsystemBase {
      * fix the issue.
      */
 
-    config = new RobotConfig(
-      PathPlannerConstants.robotMass,
-      PathPlannerConstants.MOI, 
-
-        new ModuleConfig(ModuleConstants.kWheelDiameterMeters, 
-            ModuleConstants.maxDriveVelocityMPS, 
-            ModuleConstants.wheelCOF, 
-            DCMotor.getKrakenX60(1).withReduction(ModuleConstants.gearBox), 
-            ModuleConstants.driveCurrentLimit, 1), 
-
-        new Translation2d(DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2), // + - antes
-        new Translation2d(DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2), // + + antes
-        new Translation2d(-DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2), // - - antes
-        new Translation2d(-DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2));
-
     try {
-      config = RobotConfig.fromGUISettings();
+      config = new RobotConfig(
+          PathPlannerConstants.robotMass,
+          PathPlannerConstants.MOI,
+
+          new ModuleConfig(ModuleConstants.kWheelDiameterMeters / 2,
+              ModuleConstants.maxDriveVelocityMPS,
+              ModuleConstants.wheelCOF,
+              DCMotor.getKrakenX60(1).withReduction(ModuleConstants.gearBox),
+              ModuleConstants.driveCurrentLimit, 1),
+          DriveConstants.kDriveKinematics.getModules());
+
       AutoBuilder.configure(
           this::getPoseEstimator, // Robot pose supplier
           this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
@@ -363,7 +359,7 @@ public class SwerveSubsystem extends SubsystemBase {
             backRightModule.getPosition()
         });
   }
-
+  
   /**
    * update pose estimator using absoule coordenates from limelight
    */
@@ -477,19 +473,13 @@ public class SwerveSubsystem extends SubsystemBase {
             m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
 
           }
-          else
-          {
-            System.out.println("no one cam identifield a tag!!!");
-            System.out.println("avg areal: " + leftLimelight.avgTagArea);
-            System.out.println("tag count: " + leftLimelight.tagCount);
-          }
         }
       }
       /**
        * Checks if only the front Limelight camera is connected and has valid
        * measurements.
        */
-      if (rearLimelight == null && frontLimelight != null) {
+      if (rearLimelight == null && frontLimelight != null && leftLimelight == null) {
         if (frontLimelight.tagCount == 0) {
           doRejectUpdate = true;
         }
@@ -507,13 +497,30 @@ public class SwerveSubsystem extends SubsystemBase {
        * Checks if only the rear Limelight camera is connected and has valid
        * measurements.
        */
-      if (rearLimelight != null && frontLimelight == null) {
+      if (rearLimelight != null && frontLimelight == null && leftLimelight == null) {
         if (rearLimelight.tagCount == 0) {
           doRejectUpdate = true;
         }
         if (!doRejectUpdate) {
           if (rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3) {
             bestMeasurement = rearLimelight;
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+          }
+        }
+      }
+
+      /**
+       * Checks if only the rear Limelight camera is connected and has valid
+       * measurements.
+       */
+      if (rearLimelight == null && frontLimelight == null && leftLimelight != null) {
+        if (leftLimelight.tagCount == 0) {
+          doRejectUpdate = true;
+        }
+        if (!doRejectUpdate) {
+          if (leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3) {
+            bestMeasurement = leftLimelight;
             m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
             m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
           }
