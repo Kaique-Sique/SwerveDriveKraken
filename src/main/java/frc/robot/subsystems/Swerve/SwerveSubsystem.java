@@ -390,11 +390,6 @@ public class SwerveSubsystem extends SubsystemBase {
       LimelightHelpers.PoseEstimate leftLimelight = LimelightHelpers
           .getBotPoseEstimate_wpiBlue_MegaTag2(DriveConstants.limelightLeft);
 
-      if(leftLimelight.tagCount > 0)
-      {
-        System.out.println("tag encontrada");
-      }
-
       // Reject vision updates if the robot is rotating too fast
       if (Math.abs(gyro.getAngularVelocityZDevice().refresh().getValueAsDouble()) > 720) {
         doRejectUpdate = true;
@@ -451,14 +446,23 @@ public class SwerveSubsystem extends SubsystemBase {
             bestMeasurement = frontLimelight;
             m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
             m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+
           } else if (rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3) {
             bestMeasurement = rearLimelight;
             m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
             m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+
           } else if (leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3) {
             bestMeasurement = leftLimelight;
             m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
             m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+
+          }
+          else
+          {
+            System.out.println("no one cam identifield a tag!!!");
+            System.out.println("avg areal: " + leftLimelight.avgTagArea);
+            System.out.println("tag count: " + leftLimelight.tagCount);
           }
         }
       }
