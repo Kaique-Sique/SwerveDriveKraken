@@ -122,20 +122,7 @@ public class SwerveSubsystem extends SubsystemBase {
       isBlue = false, blueAlliance = false, isAlliancePresent = false;
 
   // PathPlanner Config
-  private RobotConfig config = new RobotConfig(
-                        PathPlannerConstants.robotMass,
-                        PathPlannerConstants.MOI, 
-
-                          new ModuleConfig(ModuleConstants.kWheelDiameterMeters, 
-                              ModuleConstants.maxDriveVelocityMPS, 
-                              ModuleConstants.wheelCOF, 
-                              DCMotor.getKrakenX60(1).withReduction(ModuleConstants.gearBox), 
-                              ModuleConstants.driveCurrentLimit, 1), 
-
-        new Translation2d(DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2), // + - antes
-        new Translation2d(DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2), // + + antes
-        new Translation2d(-DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2), // - - antes
-        new Translation2d(-DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2));
+  private RobotConfig config;
 
   // Select alliance heading - default is blue
   private double allianceHeading = 0;
@@ -237,6 +224,22 @@ public class SwerveSubsystem extends SubsystemBase {
      * Report the error to the Driver Station, allowing the team to investigate and
      * fix the issue.
      */
+
+    config = new RobotConfig(
+      PathPlannerConstants.robotMass,
+      PathPlannerConstants.MOI, 
+
+        new ModuleConfig(ModuleConstants.kWheelDiameterMeters, 
+            ModuleConstants.maxDriveVelocityMPS, 
+            ModuleConstants.wheelCOF, 
+            DCMotor.getKrakenX60(1).withReduction(ModuleConstants.gearBox), 
+            ModuleConstants.driveCurrentLimit, 1), 
+
+        new Translation2d(DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2), // + - antes
+        new Translation2d(DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2), // + + antes
+        new Translation2d(-DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2), // - - antes
+        new Translation2d(-DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2));
+
     try {
       config = RobotConfig.fromGUISettings();
       AutoBuilder.configure(
