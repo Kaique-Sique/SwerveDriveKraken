@@ -12,7 +12,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 //Robot Imports
 import frc.robot.Constants.OIConstants.JoystickDriverConstants;
 import frc.robot.Limelight.LimelightHelpers;
-import frc.robot.Utils.FieldPoses;
+import frc.robot.Utils.PoseInterface;
+import frc.robot.Utils.TouchScreenInterface;
 import frc.robot.subsystems.LedControl;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 
@@ -33,6 +34,10 @@ public class RobotContainer {
   // Put all subsystems here...
   public static LimelightHelpers limelightHelpers = new LimelightHelpers();
   public static LedControl ledControl = new LedControl();
+
+  //touchScreenInterface instance
+  public static TouchScreenInterface touchInterf = new TouchScreenInterface();
+  public static PoseInterface poseInterf = new PoseInterface();
 
   // Swerve Drive
   public static SwerveSubsystem swerveDrive = new SwerveSubsystem();
@@ -88,8 +93,9 @@ public class RobotContainer {
     // zero heading - swerve modules to 0 degrees
     driverJoystick.start().onTrue(new InstantCommand(swerveDrive::zeroHeading));
 
+    //exemple driveToThePoint command with interface position
     driverJoystick.x().whileTrue(
-                swerveDrive.driveToThePoint(()-> FieldPoses.front18));
+                swerveDrive.driveToThePoint(()-> poseInterf.GetPoseChoosed()));
   }
 
   /**

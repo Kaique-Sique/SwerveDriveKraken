@@ -109,7 +109,7 @@ public class SwerveModule extends SubsystemBase {
    */
   public SwerveModuleState getState() {
     return new SwerveModuleState(this.getDriveVelocityMPS(),
-        new Rotation2d(this.getTurningRotation() - m_chassisAngularOffset));
+        new Rotation2d(this.getTurningPositionRad() - m_chassisAngularOffset));
   }
 
   /**

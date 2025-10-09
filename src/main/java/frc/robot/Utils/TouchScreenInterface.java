@@ -4,22 +4,25 @@
 
 package frc.robot.Utils;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 
 public class TouchScreenInterface extends SubsystemBase {
 
   boolean enableInterface;
 
-  boolean btnValues[] = new boolean[16]
+  boolean btnValues[] = new boolean[16];
+  
   /**
-   * @ this method set buttons option on the code
+   * this method set buttons option on the code
    */
-  public enum screenButtons()
+  public enum screenButtons
   {
     //A buttom add option
     kA("A"),
     //A buttom add option
-    kB("B")
+    kB("B");
 
     public final String value;
 
@@ -43,19 +46,24 @@ public class TouchScreenInterface extends SubsystemBase {
       btnValues[buttons.ordinal()] = false;
 
       //put NT buttons to false
-      SmartDashboard.putBoolean(buttom.toString() + "Value", btnValues[buttons.ordinal()]);
+      SmartDashboard.putBoolean(buttons.toString() + "Value", btnValues[buttons.ordinal()]);
     }
   }
 
   @Override
   public void periodic() {
-    enableInterface = SmartDashboard.putBoolean("enableInterface", isInterfaceEnabled());
+    enableInterface = SmartDashboard.putBoolean("enableInterface", isEnableInterface());
 
     for(screenButtons buttons : screenButtons.values())
     {
       btnValues[buttons.ordinal()] = SmartDashboard.getBoolean(buttons.toString() + "Value", 
                                                                 btnValues[buttons.ordinal()]);
     }
+  }
+
+  public boolean getVirtualButton(screenButtons button)
+  {
+    return btnValues[button.ordinal()];
   }
 
   public void enableInterface()
