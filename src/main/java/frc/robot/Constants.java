@@ -64,19 +64,14 @@ public final class Constants {
     public static final double kDriveRPMSpeed = kDriveRPMPi / kWheelDiameterMeters;
 
     /**************************************
-     * Turning REV SparkMax PID settings *
+     * Turning Motor PID Settings*
      **************************************/
 
-    // 14,285%
-    public static final double kPTurning = 64.887245;// ANTERIOR 0,5 //0,25 ; 0.2142875; 0.175; 0.125; 0.23
+    public static final double kPTurning = 64.887245;
     public static final double kITurning = 0;
     public static final double kDTurning = 2.529675;
 
-    // The F parameter should only be set when using a velocity-based PID
-    // controller,
-    // and should be set to zero otherwise to avoid unwanted behavior.
-    public static final double kTurningFF = 0; // 1.0/473.0; //
-
+    public static final double kTurningFF = 0; 
     public static final double kTurningKS = 0.3064;
     public static final double kTurningKV = 1.60;
     public static final double kTurningKA = 0.0;
@@ -84,29 +79,22 @@ public final class Constants {
     public static final double kTurningMinOutput = -1;
     public static final double kTurningMaxOutput = 1;
 
+    public static final NeutralModeValue turningNeutralMode = NeutralModeValue.Coast;
+
     /**********************************
      * Driving TALON Fx PID settings *
      *********************************/
-    /**************************************************************
-     * @category Drive Motor Characterization Values From SYSID
-     *           TO DO: This must be tuned to specific robot
-     ************************************************************/
-    public static final double driveKS = 0.15;// <-MNL 11/11/2024 0.1; //0.32; // Add 0.1 V output to overcome static
-                                                // friction
-    public static final double driveKV = 0.73; // 1.51; // A velocity target of 1 rps results in 0.12 V output
-    public static final double driveKA = 0.0; // 0.27;
-
-    // 11,69%
-    public static final double kPdriving = 0.31;// <--MNL11/11/2024 0.0665;//ANTERIOR 0,0665 ; 0.05872615 // kP = 0.11 An
-                                               // error of 1 rps results in 0.11 V output
+    public static final double kPdriving = 0.31;
     public static final double kIdriving = 0.0;
     public static final double kDdriving = 0.0;
 
+    public static final double driveKS = 0.15;
+    public static final double driveKV = 0.73; 
+    public static final double driveKA = 0.0; 
     public static final double kFFdriving = 1 / kDriveWheelFreeSpeedRps;
+
     public static final double kDrivingMinOutput = -1;
     public static final double kDrivingMaxOutput = 1;
-
-    public static final NeutralModeValue turningNeutralMode = NeutralModeValue.Coast; // TalonFx
 
     /* Swerve Current Limiting */
     // TalonFX
@@ -124,8 +112,6 @@ public final class Constants {
 
     public static double gearBox = 6.12;
 
-    /* Neutral Modes */
-    public static final NeutralModeValue kTurningMotorIdleMode = NeutralModeValue.Coast; // template was coast SparkMax
     public static final NeutralModeValue driveNeutralMode = NeutralModeValue.Brake; // TalonFx
   }
 
@@ -158,74 +144,60 @@ public final class Constants {
 
     //
     /**
-     * MNL 17/10/2024
-     * kFrontLeftChassisAngularOffset = 0: This means that when your front left
-     * module's turning motor is at its zero position,
-     * the module is pointing straight forward relative to the chassis.
-     * kFrontRightChassisAngularOffset = 0: This suggests your front right module is
-     * also pointing forward when its turning motor
-     * is at zero.
-     * kBackLeftChassisAngularOffset = Math.PI: This means that your back left
-     * module is pointing 180 degrees from the front left
-     * module. So, when its turning motor is at zero, the module is pointing
-     * straight backward relative to the chassis.
-     * kBackRightChassisAngularOffset = Math.PI: This means that your back right
-     * module is also pointing straight backward
-     * when its turning motor is at zero.
-     ******/
+     * these are anglar offsets of robot to each wheel of modules
+     **/
     public static final double kFrontLeftChassisAngularOffset = 0;//
     public static final double kFrontRightChassisAngularOffset = Math.PI;
     public static final double kBackLeftChassisAngularOffset = 0;
     public static final double kBackRightChassisAngularOffset = Math.PI;
 
-    // Portas dos Kraken
+    // Drive Motors IDs
     public static final int kFrontLeftDriveMotorPort = 15;
     public static final int kBackLeftDriveMotorPort = 12;
     public static final int kFrontRightDriveMotorPort = 10;
     public static final int kBackRightDriveMotorPort = 14;
 
-    // Portas dos Sparks
+    // Turning Motors IDs
     public static final int kFrontLeftTurningMotorPort = 16;
     public static final int kBackLeftTurningMotorPort = 11;
     public static final int kFrontRightTurningMotorPort = 9;
     public static final int kBackRightTurningMotorPort = 13;
 
-    // CanCoder ports
+    // CanCoder IDs
     public static final int kFrontLeftDriveAbsoluteEncoderPort = 5;
     public static final int kBackLeftDriveAbsoluteEncoderPort = 4;
     public static final int kFrontRightDriveAbsoluteEncoderPort = 7;
     public static final int kBackRightDriveAbsoluteEncoderPort = 6;
-    public static final int kPigeonPort = 30;// 7563
+    public static final int kPigeonPort = 30;
 
     /**
-     * SINTONIA DAS RODAS
+     * Offsets of each module wheels
      * FL => FRONT LEFT
      * FR => FRONT RIGHT
      * BL => BACK LEFT
      * BR => BACK RIGHT
      */
-
     public static final Rotation2d angleOffsetFLTurning = Rotation2d.fromDegrees(-4.85);
     public static final Rotation2d angleOffsetFRTurning = Rotation2d.fromDegrees(-77.43);
     public static final Rotation2d angleOffsetBLTurning = Rotation2d.fromDegrees(142.207);
     public static final Rotation2d angleOffsetBRTurning = Rotation2d.fromDegrees(-91.14);
 
     /*******************************************************
-     * constante que limita a velocidade maxima drive teleop*
+     * constants that define speed limits of modules wheels*
      ******************************************************/
-    public static final double kPhysicalMaxSpeedMetersPerSecond = 5; // kRAKEN - GEAR RATIO L4
-    public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * Math.PI;// 2*2* Math.PI; //
+    public static final double kPhysicalMaxSpeedMetersPerSecond = 5; // KRAKEN - GEAR RATIO L4
+    public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * Math.PI;
 
-    public static final double kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond / 1.052;// anterior
-                                                                                                            // 1.175
-                                                                                                            // 4,25531914893617
+    public static final double kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond / 1.052;
+
     public static final double kTeleDriveMaxAngularSpeedRadiansPerSecond = kPhysicalMaxAngularSpeedRadiansPerSecond
-        / 1.75;// anterior 2
+        / 1.75;
 
     // Slew Rate adjustments
-    public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 2.5;// anterior 2 - 2/12/2024 MNL
-    public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 2.5;// anterior 2 2/12/2024 MNL
+    public static final double kTeleDriveMaxAccelerationUnitsPerSecond = 2.5;
+    public static final double kTeleDriveMaxAngularAccelerationUnitsPerSecond = 2.5;
 
+    //limelights names string constants
     public static final String limelightFront = "limelight-front";
     public static final String limelightBack = "limelight-back";
     public static final String limelightLeft = "limelight-left";
@@ -237,13 +209,13 @@ public final class Constants {
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = DriveConstants.kPhysicalMaxSpeedMetersPerSecond / 5.0; // 4
     public static final double kMaxAngularSpeedRadiansPerSecond = DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond
-        / 2;// div/2//10,20
+        / 2;
 
-    public static final double kMaxAccelerationMetersPerSecondSquared = 1.0; // 3
-    public static final double kMaxAngularAccelerationRadiansPerSecondSquared = Math.PI / 2; // pi/2//4
+    public static final double kMaxAccelerationMetersPerSecondSquared = 1.0; 
+    public static final double kMaxAngularAccelerationRadiansPerSecondSquared = Math.PI / 2;
 
-    public static final double kPXController = 10;// 1.5
-    public static final double kPYController = 10;// 1.5
+    public static final double kPXController = 10;
+    public static final double kPYController = 10;
     public static final double kPThetaController = 2 * Math.PI;
 
     public static final double kOffset = Units.inchesToMeters(9);
@@ -256,9 +228,10 @@ public final class Constants {
 
   // Path Planner Constants
   public static final class PathPlannerConstants {
-    public static final double kPTranslationPath = 2.5;// Anterior 0.125,
+    // PID path settings
+    public static final double kPTranslationPath = 2.5;
     public static final double kITranslationPath = 0;
-    public static final double kPRotationPath = 2;// 3.0; //3.0; 1.6
+    public static final double kPRotationPath = 2;
 
     public static final PPHolonomicDriveController AutoConfig = new PPHolonomicDriveController( // PPHolonomicController
                                                                                                 // is the built in path
@@ -269,21 +242,19 @@ public final class Constants {
         new PIDConstants(kPRotationPath, 0.0, 0.0) // Rotation PID constants
     );
 
-    public static final double maxAccelerationPath = 1;// 1.75//1.0//5.0 //3.0
+    public static final double maxAccelerationPath = 1;
     public static final double maxAngularVelocityRadPerSec = Units.degreesToRadians(540);
     public static final double maxAngularAccelerationRadPerSecSq = Units.degreesToRadians(720);
 
     public static final double robotMass = 64;
     public static final double MOI = 4;
-
   }
 
   // OI Constants
   public static final class OIConstants {
-
     public static final class JoystickDriverConstants {
-      // Joystick Driver
-      public static final int kDriverControllerPort = 0;
+      //Joystick Driver ID port
+      public static final int kDriverControllerPort = 0; 
 
       public static final int kDriverYAxis = 1;
       public static final int kDriverXAxis = 0;
