@@ -10,7 +10,19 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 /** Add your docs here. */
 public class FieldPoses {
-    //put here fields poses that you will use on the robot
-    public static final Pose2d front18 = new Pose2d(
-        new Translation2d(2.53, 3.85), Rotation2d.fromDegrees(0)); //example pose
+    public static class bluePoses {
+        public static final Pose2d reefA = new Pose2d(
+            new Translation2d(3.05, 4.18), Rotation2d.fromDegrees(0));
+
+        public static final Pose2d reefB = new Pose2d(
+            new Translation2d(3.05, 3.87), Rotation2d.fromDegrees(0));
+    }
+
+    public static class redPoses {
+        public static final Pose2d reefA = new Pose2d(
+            new Translation2d(14.47, 3.87), Rotation2d.fromDegrees(180));
+
+        public static final Pose2d reefB = new Pose2d(
+            new Translation2d(14.47,4.190), Rotation2d.fromDegrees(180));
+    }
 }

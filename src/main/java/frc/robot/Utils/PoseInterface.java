@@ -5,21 +5,36 @@
 package frc.robot.Utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.RobotContainer;
 import frc.robot.Utils.TouchScreenInterface.screenButtons;
 
 public class PoseInterface {
     private static TouchScreenInterface touchInterf = RobotContainer.touchInterf;
-    public Pose2d GetPoseChoosed()
-    {
-        if(touchInterf.getVirtualButton(screenButtons.kA))
-        {
-            return FieldPoses.front18;
+    public Pose2d GetPoseChoosed() {
+        var alliance = DriverStation.getAlliance();
+        Pose2d targetPose2d;
+        //Blue Poses
+        if (alliance.get() == DriverStation.Alliance.Blue) {
+            if (touchInterf.getVirtualButton(screenButtons.kA)) {
+                targetPose2d = FieldPoses.bluePoses.reefA;
+            } else if (touchInterf.getVirtualButton(screenButtons.kB)) {
+                targetPose2d = FieldPoses.bluePoses.reefB;
+            } else {
+            targetPose2d = RobotContainer.swerveDrive.getPoseEstimator();
+            }
         }
-        else if(touchInterf.getVirtualButton(screenButtons.kB))
+        // Red Poses
+        else
         {
-            return FieldPoses.front18;
+            if (touchInterf.getVirtualButton(screenButtons.kA)) {
+                targetPose2d = FieldPoses.redPoses.reefA;
+            } else if (touchInterf.getVirtualButton(screenButtons.kB)) {
+                targetPose2d = FieldPoses.bluePoses.reefB;
+            } else {
+            targetPose2d = RobotContainer.swerveDrive.getPoseEstimator();
+            }
         }
-        return RobotContainer.swerveDrive.getPoseEstimator();
+        return targetPose2d;
     }
 }

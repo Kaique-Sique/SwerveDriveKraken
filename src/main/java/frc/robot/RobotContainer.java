@@ -73,6 +73,7 @@ public class RobotContainer {
    * on teleop mode
    */
   private void configureBindings() {
+    /**** Swerve Commands ****/
     // Changes robot speed - slow, fast, max
     driverJoystick.leftBumper().whileTrue(
         new InstantCommand(() -> {
@@ -93,6 +94,8 @@ public class RobotContainer {
     // zero heading - swerve modules to 0 degrees
     driverJoystick.start().onTrue(new InstantCommand(swerveDrive::zeroHeading));
 
+
+    /**** Teleop Commands ****/
     //exemple driveToThePoint command with interface position
     driverJoystick.x().whileTrue(
                 swerveDrive.driveToThePoint(()-> poseInterf.GetPoseChoosed()));
@@ -104,7 +107,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // choose the auto command from dashboard
     return null;
   }
 }
