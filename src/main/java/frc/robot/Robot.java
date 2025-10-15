@@ -126,11 +126,7 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
-    // 01/25/2025 MNL
-    // This is a test to see if we can get the limelight values when the robot is
-    // disabled
-    // LimelightHelpers.getLatestResults(DriveConstants.limelightFront);
-    // LimelightHelpers.getLatestResults(DriveConstants.limelightBack);
+    RobotContainer.touchInterf.disableInterface();
   }
 
   @Override
@@ -167,6 +163,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    RobotContainer.touchInterf.enableInterface();
   }
 
   /** This function is called periodically during operator control. */
