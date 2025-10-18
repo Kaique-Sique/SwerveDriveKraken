@@ -722,6 +722,8 @@ public class SwerveSubsystem extends SubsystemBase {
    * on-the-fly based on real-time conditions,
    * such as sensor feedback or joystick input.
    * 
+   * @ without DeadBand
+   * 
    * @param xSpdFunction          Speed of the robot in the x direction (forward).
    * @param ySpdFunction          Speed of the robot in the y direction
    *                              (sideways).
