@@ -7,9 +7,13 @@ package frc.robot.subsystems.Swerve;
 import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 //JAVA Imports
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import com.ctre.phoenix6.StatusCode;
 
@@ -182,26 +186,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // field2d = new Field2d();
     // SmartDashboard.putData("Field", field2d);
 
-    /**
-     * MNL 06/26/2025 --> Also See Robot.java init
-     * Zeroing / Seeding Limelight initial orientation -
-     * To reset the internal IMU's fused robot yaw to the yaw submitted via
-     * SetRobotOrientation()
-     * IMU Modes:
-     * 0 - Use external IMU yaw submitted via SetRobotOrientation() for MT2
-     * localization. The internal IMU is ignored entirely.
-     * 1 - Use external IMU yaw submitted via SetRobotOrientation(),
-     * and configure the LL4 internal IMU's fused yaw to match the submitted yaw
-     * value.
-     * 2 - Use internal IMU for MT2 localization.
-     */
-
-    // limelight config
-    LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 1);
-    LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightFront, 0.110, 0.259, 0.410, 0, 0, 0);
-    LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightLeft, 0.191, -0.25, 0.524, 0, 0, 0);
-    LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightBack, 0.130, 0.259, 0.870, 0, 25, 180);
-    LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 2);
+    setLimlightsPose();
 
     // Initialize pose estimator ALWAYS towards to red wall
     m_poseEstimator = new SwerveDrivePoseEstimator(
@@ -264,13 +249,21 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
+  public void setLimlightsPose() {
+    LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 1);
+    LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightFront, 0.110, 0.259, 0.410, 0, 0, 0);
+    LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightLeft, 0.191, -0.25, 0.524, 0, 0, 0);
+    LimelightHelpers.setCameraPose_RobotSpace(DriveConstants.limelightBack, 0.130, 0.259, 0.870, 0, 25, 180);
+    LimelightHelpers.SetIMUMode(DriveConstants.limelightFront, 2);
+  }
+
   @Override
   public void periodic() {
 
     initializeAliance();
 
     this.updatePoseEstimator();
-    this.addPoseVision();
+    this.addPoseVisionNew();
 
     // Output to SmartDashboard
     SmartDashboard.putNumber("PoseEstimator /Pose X (meters)", this.getPoseEstimator().getX());
@@ -358,271 +351,58 @@ public class SwerveSubsystem extends SubsystemBase {
             backRightModule.getPosition()
         });
   }
-  
+
   /**
    * update pose estimator using absoule coordenates from limelight
    */
-  public void addPoseVision() {
-    boolean doRejectUpdate = false; // set to true to reject update
+  public void addPoseVisionNew() {
+    boolean doRejectUpdate = false;
 
-    // lime light best measurement based on the better view
-    LimelightHelpers.PoseEstimate bestMeasurement = null;
+    try {
+      // List of cameras to process
+      List<String> cameras = List.of(
+          DriveConstants.limelightFront,
+          DriveConstants.limelightBack,
+          DriveConstants.limelightLeft);
 
-    boolean useMegaTag2 = true; // set to false to use MegaTag1
+      // Set robot orientation for all cameras
+      double robotRotationDegrees = m_poseEstimator.getEstimatedPosition().getRotation().getDegrees();
+      for (String camera : cameras) {
+        LimelightHelpers.SetRobotOrientation(camera, robotRotationDegrees, 0, 0, 0, 0, 0);
+      }
 
-    if (useMegaTag2) {
-      // Set the robot's orientation using the current estimated position's rotation
-      // degrees for each camera.
-      LimelightHelpers.SetRobotOrientation(DriveConstants.limelightFront,
-          m_poseEstimator
-              .getEstimatedPosition()
-              .getRotation()
-              .getDegrees(),
-          0, 0, 0, 0, 0);
+      // Get pose estimates for all cameras
+      List<LimelightHelpers.PoseEstimate> poseEstimates = cameras.stream()
+          .map(LimelightHelpers::getBotPoseEstimate_wpiBlue_MegaTag2)
+          .filter(Objects::nonNull) // Filter out null estimates
+          .collect(Collectors.toList());
 
-      LimelightHelpers.SetRobotOrientation(DriveConstants.limelightBack,
-          m_poseEstimator
-              .getEstimatedPosition()
-              .getRotation()
-              .getDegrees(),
-          0, 0, 0, 0, 0);
-
-      LimelightHelpers.SetRobotOrientation(DriveConstants.limelightLeft,
-          m_poseEstimator
-              .getEstimatedPosition()
-              .getRotation()
-              .getDegrees(),
-          0, 0, 0, 0, 0);
-
-      // Pose estimates are obtained from both cameras.
-      LimelightHelpers.PoseEstimate frontLimelight = LimelightHelpers
-          .getBotPoseEstimate_wpiBlue_MegaTag2(DriveConstants.limelightFront);
-
-      LimelightHelpers.PoseEstimate rearLimelight = LimelightHelpers
-          .getBotPoseEstimate_wpiBlue_MegaTag2(DriveConstants.limelightBack);
-
-      LimelightHelpers.PoseEstimate leftLimelight = LimelightHelpers
-          .getBotPoseEstimate_wpiBlue_MegaTag2(DriveConstants.limelightLeft);
-
-      // Reject vision updates if the robot is rotating too fast
+      // Reject vision updates if angular velocity is too high
       if (Math.abs(gyro.getAngularVelocityZDevice().refresh().getValueAsDouble()) > 720) {
         doRejectUpdate = true;
       }
-      /**
-       * Checks if both Limelight cameras are connected and have valid measurements.
-       */
-      if (frontLimelight != null && rearLimelight != null && leftLimelight != null) {
-        // if there isn't any tag detected on both cameras, reject the update
-        if (frontLimelight.tagCount == 0 && rearLimelight.tagCount == 0 && leftLimelight.tagCount == 0) {
-          doRejectUpdate = true;
-        }
-        if (!doRejectUpdate) {
-          if (frontLimelight.tagCount > 0 && rearLimelight.tagCount > 0 && leftLimelight.tagCount > 0 &&
-              rearLimelight.avgTagDist < 3 && frontLimelight.avgTagDist < 3 && leftLimelight.avgTagDist < 3) {
 
-            if (frontLimelight.avgTagArea >= rearLimelight.avgTagArea
-                && frontLimelight.avgTagArea >= leftLimelight.avgTagArea) {
-              bestMeasurement = frontLimelight;
-            } else if (rearLimelight.avgTagArea >= frontLimelight.avgTagArea
-                && rearLimelight.avgTagArea >= leftLimelight.avgTagArea) {
-              bestMeasurement = rearLimelight;
-            } else {
-              bestMeasurement = leftLimelight;
-            }
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          } else if (frontLimelight.tagCount > 0 && rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3
-              && frontLimelight.avgTagDist < 3) {
-            // Both cameras have valid measurements, choose the one with the higher tag
-            // count
-            bestMeasurement = (frontLimelight.avgTagArea >= rearLimelight.avgTagArea) ? frontLimelight : rearLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          } else if (frontLimelight.tagCount > 0 && leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3
-              && frontLimelight.avgTagDist < 3) {
-            // Both cameras have valid measurements, choose the one with the higher tag
-            // count
-            bestMeasurement = (frontLimelight.avgTagArea >= leftLimelight.avgTagArea) ? frontLimelight : leftLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          } else if (rearLimelight.tagCount > 0 && leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3
-              && rearLimelight.avgTagDist < 3) {
-            // Both cameras have valid measurements, choose the one with the higher tag
-            // count
-            bestMeasurement = (rearLimelight.avgTagArea >= leftLimelight.avgTagArea) ? rearLimelight : leftLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          } else if (frontLimelight.tagCount > 0 && frontLimelight.avgTagDist < 3) {
-            bestMeasurement = frontLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          } else if (rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3) {
-            bestMeasurement = rearLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          } else if (leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3) {
-            bestMeasurement = leftLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          }
-        }
-      }
-      /**
-       * Checks if only the front Limelight camera is connected and has valid
-       * measurements.
-       */
-      if (rearLimelight == null && frontLimelight != null && leftLimelight == null) {
-        if (frontLimelight.tagCount == 0) {
-          doRejectUpdate = true;
-        }
-
-        if (!doRejectUpdate) {
-          if (frontLimelight.tagCount > 0 && frontLimelight.avgTagDist < 3) {
-            bestMeasurement = frontLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-          }
-        }
-      }
-      /** 
-       * checks if just left and front cam work
-       */
-      if (rearLimelight == null && frontLimelight != null && leftLimelight != null) 
-        {
-          if (leftLimelight.tagCount == 0 && frontLimelight.tagCount == 0) {
-            doRejectUpdate = true;
-          }
-          if (!doRejectUpdate){
-          if (frontLimelight.tagCount > 0 && leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3
-              && frontLimelight.avgTagDist < 3) {
-            // Both cameras have valid measurements, choose the one with the higher tag
-            // count
-            bestMeasurement = (frontLimelight.avgTagArea >= leftLimelight.avgTagArea) ? frontLimelight : leftLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          }
-          else if (frontLimelight.tagCount > 0 && frontLimelight.avgTagDist < 3) {
-            bestMeasurement = frontLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          }
-          else if (leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3) {
-            bestMeasurement = leftLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-            
-          }
-        }
+      // Reject updates if no valid measurements are available
+      if (poseEstimates.isEmpty()) {
+        doRejectUpdate = true;
       }
 
-      /** 
-       * checks if just rear and front cam work
-       */
-      if (rearLimelight != null && frontLimelight != null && leftLimelight == null) 
-        {
-          if (rearLimelight.tagCount == 0 && frontLimelight.tagCount == 0) {
-            doRejectUpdate = true;
-          }
-          if (!doRejectUpdate){
-          if (frontLimelight.tagCount > 0 && rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3
-              && frontLimelight.avgTagDist < 3) {
-            // Both cameras have valid measurements, choose the one with the higher tag
-            // count
-            bestMeasurement = (frontLimelight.avgTagArea >= rearLimelight.avgTagArea) ? frontLimelight : rearLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
+      if (!doRejectUpdate) {
+        // Select the best measurement based on tag count, distance, and area
+        LimelightHelpers.PoseEstimate bestMeasurement = poseEstimates.stream()
+            .filter(p -> p.tagCount > 0 && p.avgTagDist < 3) // Valid measurements
+            .max(Comparator.comparingDouble(p -> p.avgTagArea)) // Select the one with the largest tag area
+            .orElse(null);
 
-          }
-          else if (frontLimelight.tagCount > 0 && frontLimelight.avgTagDist < 3) {
-            bestMeasurement = frontLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          }
-          else if (rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3) {
-            bestMeasurement = rearLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-            
-          }
+        if (bestMeasurement != null) {
+          // Add the best measurement to the pose estimator
+          m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
+          m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
         }
       }
-
-      /** 
-       * checks if just rear and left cam work
-       */
-      if (rearLimelight != null && frontLimelight == null && leftLimelight != null) 
-        {
-          if (rearLimelight.tagCount == 0 && leftLimelight.tagCount == 0) {
-            doRejectUpdate = true;
-          }
-          if (!doRejectUpdate){
-          if (leftLimelight.tagCount > 0 && rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3
-              && leftLimelight.avgTagDist < 3) {
-            // Both cameras have valid measurements, choose the one with the higher tag
-            // count
-            bestMeasurement = (leftLimelight.avgTagArea >= rearLimelight.avgTagArea) ? leftLimelight : rearLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          }
-          else if (leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3) {
-            bestMeasurement = leftLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-
-          }
-          else if (rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3) {
-            bestMeasurement = rearLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-            
-          }
-        }
-      }
-
-      /**
-       * Checks if only the rear Limelight camera is connected and has valid
-       * measurements.
-       */
-      if (rearLimelight != null && frontLimelight == null && leftLimelight == null) {
-        if (rearLimelight.tagCount == 0) {
-          doRejectUpdate = true;
-        }
-        if (!doRejectUpdate) {
-          if (rearLimelight.tagCount > 0 && rearLimelight.avgTagDist < 3) {
-            bestMeasurement = rearLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-          }
-        }
-      }
-
-      /**
-       * Checks if only the left Limelight camera is connected and has valid
-       * measurements.
-       */
-      if (rearLimelight == null && frontLimelight == null && leftLimelight != null) {
-        if (leftLimelight.tagCount == 0) {
-          doRejectUpdate = true;
-        }
-        if (!doRejectUpdate) {
-          if (leftLimelight.tagCount > 0 && leftLimelight.avgTagDist < 3) {
-            bestMeasurement = leftLimelight;
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-            m_poseEstimator.addVisionMeasurement(bestMeasurement.pose, bestMeasurement.timestampSeconds);
-          }
-        }
-      }
+    } catch (Exception e) {
+      // Handle exception as needed
+      DriverStation.reportError("Failed to get Limelight botpose", e.getStackTrace());
     }
   }
 
