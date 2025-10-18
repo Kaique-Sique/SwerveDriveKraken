@@ -383,7 +383,7 @@ public class SwerveSubsystem extends SubsystemBase {
       }
 
       // Reject updates if no valid measurements are available
-      if (poseEstimates.isEmpty() || doRejectUpdate) {
+      if (poseEstimates.isEmpty()) {
         doRejectUpdate = true;
       }
 
